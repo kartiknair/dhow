@@ -24,7 +24,7 @@
         "fast-glob": "^3.2.4",
         "fs-extra": "^9.0.1",
         "live-server": "^1.2.1",
-        "nodom": "^2.4.0",
+        "min-document": "^2.19.0",
         "ora": "^4.0.4",
         "postcss": "^7.0.32"
     },

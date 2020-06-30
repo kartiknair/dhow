@@ -1,5 +1,4 @@
-const { Document } = require('nodom')
-const document = new Document()
+const document = require('min-document')
 
 const createElement = (tag, props, ...children) => {
     if (typeof tag === 'function') return tag(props, ...children)
@@ -7,6 +6,7 @@ const createElement = (tag, props, ...children) => {
 
     Object.entries(props || {}).forEach(([name, value]) => {
         if (name === 'html') element.innerHTML = value
+        else if (name === 'class') element.className += value.toString()
         else element.setAttribute(name, value.toString())
     })
 

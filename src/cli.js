@@ -4,7 +4,7 @@ import { join } from 'path'
 import fg from 'fast-glob'
 import fse from 'fs-extra'
 import esbuild from 'esbuild'
-import nodom from 'nodom'
+import document from 'min-document'
 import postcss from 'postcss'
 import cssnano from 'cssnano'
 import autoprefixer from 'autoprefixer'
@@ -21,7 +21,6 @@ const {
     existsSync,
 } = fse
 const { startService } = esbuild
-const { Document } = nodom
 
 const onWatchMode =
     process.argv.includes('-w') || process.argv.includes('--watch')
@@ -30,8 +29,6 @@ const outDir = onWatchMode ? '__dhow__' : 'out'
 const baseDir = join(cwd, outDir)
 const srcDir = join(cwd, 'src')
 let randomQuery = 0 // Used to invalidate dynamic import cache
-
-global.document = new Document()
 
 // Async wrapper
 async function build() {
@@ -87,19 +84,22 @@ async function build() {
             )
 
             const htmlEl = customDocumentExports.default()
-            const bodyEl = htmlEl.querySelector('body')
-            const headEl = htmlEl.querySelector('head')
 
-            Object.entries(htmlEl.attributes).forEach(([key, val]) => {
-                document.querySelector('html').setAttribute(key, val.toString())
+            const bodyEl = htmlEl.getElementsByTagName('body')[0]
+            const headEl = htmlEl.getElementsByTagName('head')[0]
+
+            Object.entries(htmlEl._attributes[null]).forEach(([key, val]) => {
+                document
+                    .getElementsByTagName('html')[0]
+                    .setAttribute(key, val.toString())
             })
 
             bodyEl.childNodes.forEach((childNode) => {
-                document.querySelector('body').appendChild(childNode)
+                document.getElementsByTagName('body')[0].appendChild(childNode)
             })
 
             headEl.childNodes.forEach((childNode) => {
-                document.querySelector('head').appendChild(childNode)
+                document.getElementsByTagName('head')[0].appendChild(childNode)
             })
 
             pages = pages.filter(
@@ -165,8 +165,10 @@ async function build() {
 }
 
 function writePageDOM(pageDOM, pageHead, path) {
-    const rootEl = document.querySelector('#dhow')
-    const headEl = document.querySelector('head')
+    const rootEl = document.getElementsByClassName('dhow')[0]
+    const headEl = document.getElementsByTagName('head')[0]
+
+    console.log(document.body.childNodes[0])
 
     rootEl.appendChild(pageDOM)
 
@@ -175,7 +177,7 @@ function writePageDOM(pageDOM, pageHead, path) {
     }
 
     ensureFileSync(path)
-    writeFileSync(path, `<!DOCTYPE html>` + document.documentElement.outerHTML)
+    writeFileSync(path, `<!DOCTYPE html>` + document.documentElement.toString())
 
     rootEl.removeChild(pageDOM)
     for (let node of pageHead) {

@@ -12,7 +12,7 @@ const Document = () => (
             <link rel="stylesheet" href="/styles/main.css" />
         </head>
         <body>
-            <div id="dhow"></div>
+            <div class="dhow"></div>
             <script
                 html={`
                 window.onload = function () {

@@ -6,7 +6,7 @@ test('fragment and nested fragments should return children as array', async (don
 
     try {
         const parsed = await service.transform(
-            `<div>
+            `return <div>
     <p>Hello fragments!</p>
     {[1, 2, 3, 4].map((item) => (
         <>
@@ -32,8 +32,8 @@ test('fragment and nested fragments should return children as array', async (don
 
         const actualResult = `<div><p>Hello fragments!</p><p><small>just another item</small></p><p>1</p><div><p>What about even more nesting</p><span>Hello! I'm very deeply nested</span></div><p><small>just another item</small></p><p>2</p><div><p>What about even more nesting</p><span>Hello! I'm very deeply nested</span></div><p><small>just another item</small></p><p>3</p><div><p>What about even more nesting</p><span>Hello! I'm very deeply nested</span></div><p><small>just another item</small></p><p>4</p><div><p>What about even more nesting</p><span>Hello! I'm very deeply nested</span></div></div>`
 
-        const evaluated = new Function('Dhow', 'return ' + parsed.js)
-        expect(evaluated(Dhow).outerHTML).toBe(actualResult)
+        const evaluated = new Function('Dhow', parsed.js)
+        expect(evaluated(Dhow).toString()).toBe(actualResult)
         done()
     } catch (err) {
         done(err)
