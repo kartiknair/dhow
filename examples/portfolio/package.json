@@ -1,0 +1,14 @@
+{
+    "name": "basic",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "dhow -w",
+        "build": "dhow"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "type": "module"
+}
