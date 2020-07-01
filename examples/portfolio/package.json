@@ -1,5 +1,5 @@
 {
-    "name": "basic",
+    "name": "dhow-portfolio",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -10,5 +10,6 @@
     "keywords": [],
     "author": "",
     "license": "MIT",
-    "type": "module"
+    "type": "module",
+    "dependencies": {}
 }
