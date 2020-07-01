@@ -3,7 +3,7 @@
 .token.comment,
 .token.prolog,
 .token.cdata {
-    color: rgb(99, 119, 119);
+    color: #6f8585;
 }
 
 .token.punctuation {

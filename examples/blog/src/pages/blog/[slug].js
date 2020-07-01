@@ -1,5 +1,5 @@
 import Dhow from 'dhow'
-import fs from 'fs/promises'
+import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
 import matter from 'gray-matter'
 import marked from 'marked'
@@ -37,16 +37,17 @@ export const Head = ({
     <>
         <title>{title} - Kartik Nair</title>
         <meta name="description" content={description} />
+        <link rel="stylesheet" href="/styles/prism.css" />
     </>
 )
 
 export const getPaths = async () => {
-    const files = await fs.readdir('./content')
+    const files = await readdir('./content')
     return files.map((path) => path.slice(0, path.length - 3))
 }
 
 export const getProps = async (slug) => {
-    let post = await fs.readFile(join('./content', `${slug}.md`), 'utf-8')
+    let post = await readFile(join('./content', `${slug}.md`), 'utf-8')
     post = matter(post)
 
     const renderer = new marked.Renderer()

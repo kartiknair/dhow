@@ -93,11 +93,11 @@ async function build() {
                     .setAttribute(key, value.value.toString())
             })
 
-            bodyEl.childNodes.forEach((childNode) => {
+            Array.from(bodyEl.childNodes).forEach((childNode) => {
                 document.getElementsByTagName('body')[0].appendChild(childNode)
             })
 
-            headEl.childNodes.forEach((childNode) => {
+            Array.from(headEl.childNodes).forEach((childNode) => {
                 document.getElementsByTagName('head')[0].appendChild(childNode)
             })
 

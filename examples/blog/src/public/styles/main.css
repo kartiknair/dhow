@@ -1,5 +1,4 @@
 @import './typography.css';
-@import './prism.css';
 
 @font-face {
     font-family: 'Inter';
@@ -37,8 +36,8 @@
     --text-color: #212121;
     --headings-color: #000000;
 
-    --code-span-bg: #f6f8fa;
-    --code-span-color: #d73a49;
+    --code-span-bg: var(--bg);
+    --code-span-color: #b916da;
     --code-block-bg: #011627;
     --code-block-color: #f6f8fa;
 

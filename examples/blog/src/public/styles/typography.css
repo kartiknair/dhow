@@ -181,6 +181,11 @@ pre code {
     padding: 0;
 }
 
+pre code::before,
+pre code::after {
+    content: '';
+}
+
 pre code * {
     font: inherit;
 }
@@ -191,6 +196,11 @@ code {
     color: var(--code-span-color);
     padding: 0.2rem;
     border-radius: 0.2rem;
+}
+
+code::before,
+code::after {
+    content: '\`';
 }
 
 mark {
