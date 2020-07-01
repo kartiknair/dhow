@@ -78,8 +78,7 @@ async function build() {
                 join(
                     'file:///',
                     baseDir,
-                    '/src/pages/_document.js',
-                    `?randomQueryString=${randomQuery}`
+                    `./src/pages/_document.js?randomQueryString=${randomQuery}`
                 )
             )
 
@@ -88,10 +87,10 @@ async function build() {
             const bodyEl = htmlEl.getElementsByTagName('body')[0]
             const headEl = htmlEl.getElementsByTagName('head')[0]
 
-            Object.entries(htmlEl._attributes[null]).forEach(([key, val]) => {
+            Object.entries(htmlEl._attributes[null]).forEach(([key, value]) => {
                 document
                     .getElementsByTagName('html')[0]
-                    .setAttribute(key, val.toString())
+                    .setAttribute(key, value.value.toString())
             })
 
             bodyEl.childNodes.forEach((childNode) => {
@@ -109,8 +108,13 @@ async function build() {
 
         for (let page of pages) {
             const fileExports = await import(
-                join('file:///', cwd, page, `?randomQueryString=${randomQuery}`)
+                join(
+                    'file:///',
+                    cwd,
+                    `./${page}?randomQueryString=${randomQuery}`
+                )
             )
+
             let filePath = page.split('/').slice(3).join('/')
             filePath = filePath.slice(0, filePath.length - 3)
 
@@ -167,8 +171,6 @@ async function build() {
 function writePageDOM(pageDOM, pageHead, path) {
     const rootEl = document.getElementsByClassName('dhow')[0]
     const headEl = document.getElementsByTagName('head')[0]
-
-    console.log(document.body.childNodes[0])
 
     rootEl.appendChild(pageDOM)
 

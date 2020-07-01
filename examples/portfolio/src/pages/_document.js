@@ -10,7 +10,7 @@ const Document = () => (
             />
         </head>
         <body>
-            <div id="dhow"></div>
+            <div class="dhow"></div>
         </body>
     </html>
 )

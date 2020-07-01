@@ -15,6 +15,7 @@ html {
     font: var(--font-text);
     font-size: 0.9rem;
     text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga' 0, 'calt' 1;
 }
 
 body {

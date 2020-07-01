@@ -17,7 +17,7 @@ const Post = ({
             <small>{new Date(date).toDateString()}</small>
         </p>
         <p>{description}</p>
-        <h3>-</h3>
+        <h4>―</h4>
         <div html={content}></div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/cloudinary-core/2.3.0/cloudinary-core-shrinkwrap.min.js"></script>
         <script

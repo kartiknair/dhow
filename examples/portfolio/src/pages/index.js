@@ -1,5 +1,5 @@
 import Dhow from 'dhow'
-import Project from '../../components/Project.js'
+import Project from '../components/Project.js'
 
 const Home = () => (
     <main>
