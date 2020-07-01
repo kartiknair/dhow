@@ -11,7 +11,7 @@
         "require": "./src/jsx-runtime.cjs"
     },
     "scripts": {
-        "test": "jest"
+        "test": "mocha"
     },
     "keywords": [],
     "author": "",
@@ -30,6 +30,7 @@
     },
     "type": "module",
     "devDependencies": {
-        "jest": "^26.1.0"
+        "chai": "^4.2.0",
+        "mocha": "^8.0.1"
     }
 }

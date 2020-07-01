@@ -93,6 +93,7 @@ async function build() {
                     .setAttribute(key, value.value.toString())
             })
 
+            // Have to use Array.from for `min-document` specific reasons
             Array.from(bodyEl.childNodes).forEach((childNode) => {
                 document.getElementsByTagName('body')[0].appendChild(childNode)
             })

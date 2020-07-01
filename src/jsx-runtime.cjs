@@ -7,7 +7,19 @@ const createElement = (tag, props, ...children) => {
     Object.entries(props || {}).forEach(([name, value]) => {
         if (name === 'html') element.innerHTML = value
         else if (name === 'class') element.className += value.toString()
-        else element.setAttribute(name, value.toString())
+        else if (name === 'style' && typeof value === 'object') {
+            const styleString = Object.entries(value)
+                .map(
+                    ([k, v]) =>
+                        `${k.replace(
+                            /[A-Z]/g,
+                            (m) => '-' + m.toLowerCase()
+                        )}:${v.toString()}`
+                )
+                .join(';')
+
+            element.setAttribute('style', styleString)
+        } else element.setAttribute(name, value.toString())
     })
 
     children.forEach((child) => {
