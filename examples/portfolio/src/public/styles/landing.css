@@ -1,12 +1,4 @@
 @font-face {
-    font-family: 'RH Inter';
-    font-style: normal;
-    font-weight: normal;
-    src: url('/fonts/RHInter-Regular.woff2') format('woff2');
-    font-display: swap;
-}
-
-@font-face {
     font-family: 'Inter';
     font-style: normal;
     font-weight: normal;
@@ -26,7 +18,7 @@
 
 :root {
     --font-text: normal 400 1rem/1.5 'Inter', sans-serif;
-    --font-headings: normal 400 1rem/1.15 'RH Inter', sans-serif;
+    --font-headings: normal 400 1rem/1.25em 'Inter', sans-serif;
     --font-code: normal 400 1rem/1.5 monospace;
     --bg: #fff;
     --text-color: #231820;
@@ -50,40 +42,6 @@
     --primary-active: #0b3c74;
 }
 
-html {
-    font-size: 1rem;
-}
-
-@media (max-width: 380px) {
-    html {
-        font-size: 0.9rem;
-    }
-}
-
-@media (min-width: 1900px) {
-    html {
-        font-size: 1.5rem;
-    }
-}
-
-@media (min-width: 2500px) {
-    html {
-        font-size: 2rem;
-    }
-}
-
-@media (min-width: 3000px) {
-    html {
-        font-size: 2.5rem;
-    }
-}
-
-@media (min-width: 3400px) {
-    html {
-        font-size: 3rem;
-    }
-}
-
 main {
     width: 100%;
     padding: 12.5rem 15%;
@@ -91,7 +49,7 @@ main {
 }
 
 .landing {
-    padding-right: 25%;
+    padding-right: 35%;
     margin-bottom: 5rem;
 }
 
@@ -119,21 +77,16 @@ main {
     padding-right: 5rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 970px) {
     .landing {
-        padding-right: 0;
+        padding-right: 20%;
+        margin-bottom: 5rem;
     }
 
     .landing h1 {
-        font-size: 1.75rem;
+        font-size: 2rem;
     }
 
-    main {
-        padding: 7.5rem 12.5%;
-    }
-}
-
-@media (max-width: 970px) {
     .project {
         flex-direction: column;
         height: auto;
@@ -145,5 +98,20 @@ main {
 
     .project .text {
         padding: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .landing {
+        padding-right: 0;
+        margin-bottom: 3rem;
+    }
+
+    .landing h1 {
+        font-size: 1.5rem;
+    }
+
+    main {
+        padding: 7.5rem 10%;
     }
 }

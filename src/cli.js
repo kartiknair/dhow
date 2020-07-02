@@ -32,6 +32,9 @@ let randomQuery = 0 // Used to invalidate dynamic import cache
 
 // Async wrapper
 async function build() {
+    document.body.childNodes = []
+    document.head.childNodes = []
+
     const spinner = ora('Building...').start()
     // Random enough for this purpose
     randomQuery = Math.floor(Math.random() * 10000000)

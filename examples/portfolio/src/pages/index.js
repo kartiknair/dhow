@@ -6,8 +6,8 @@ import matter from 'gray-matter'
 
 const Home = ({ projects }) => (
     <main>
-        <div class="landing">
-            <h1>
+        <div class="landing" data-aos="fade-in">
+            <h1 class="animated-letters">
                 Hi! I’m Kartik Nair, a software engineer and designer. I build
                 user friendly web applications & tooling for developers
             </h1>
@@ -17,12 +17,15 @@ const Home = ({ projects }) => (
                 <Project data={project.data} />
             ))}
         </div>
+        <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+        <script html={`AOS.init();`}></script>
     </main>
 )
 
 export const Head = () => (
     <>
         <title>Kartik Nair</title>
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     </>
 )
 
