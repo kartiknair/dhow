@@ -1,16 +1,13 @@
 import Dhow from 'dhow'
 
-const Project = ({ name, image, description }) => (
-    <div
-        class="project"
-        style={`background-image: 
-                    linear-gradient(rgba(0, 0, 0, 0.5), 
-                    rgba(0, 0, 0, 0.5)),
-                    url(${image});`}
-    >
-        <h4>{name}</h4>
-        <p>{description}</p>
-    </div>
+const Project = ({ data: { title, description, image, image_alt, color } }) => (
+    <a class="project" style={{ backgroundColor: `#${color}` }}>
+        <img src={image} alt={image_alt} />
+        <div class="text">
+            <h3>{title}</h3>
+            <p>{description}</p>
+        </div>
+    </a>
 )
 
 export default Project

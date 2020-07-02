@@ -5,3 +5,9 @@ export default () => (
         <p>Hello</p>
     </div>
 )
+
+export const Head = () => (
+    <>
+        <title>Kartik Nair</title>
+    </>
+)

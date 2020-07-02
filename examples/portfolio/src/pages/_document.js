@@ -8,6 +8,11 @@ const Document = () => (
                 name="viewport"
                 content="width=device-width, initial-scale=1.0"
             />
+            <link
+                rel="stylesheet"
+                href="https://unpkg.com/simplistic-css@1.0.1/dist/classless.css"
+            />
+            <link rel="stylesheet" href="/styles/landing.css" />
         </head>
         <body>
             <div class="dhow"></div>

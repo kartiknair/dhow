@@ -1,0 +1,149 @@
+@font-face {
+    font-family: 'RH Inter';
+    font-style: normal;
+    font-weight: normal;
+    src: url('/fonts/RHInter-Regular.woff2') format('woff2');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: normal;
+    src: url('/fonts/Inter-Regular.woff2') format('woff2'),
+        url('/font/Inter-Regular.woff') format('woff');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: italic;
+    font-weight: normal;
+    src: url('/fonts/Inter-Italic.woff2') format('woff2'),
+        url('/fonts/Inter-Italic.woff') format('woff');
+    font-display: swap;
+}
+
+:root {
+    --font-text: normal 400 1rem/1.5 'Inter', sans-serif;
+    --font-headings: normal 400 1rem/1.15 'RH Inter', sans-serif;
+    --font-code: normal 400 1rem/1.5 monospace;
+    --bg: #fff;
+    --text-color: #231820;
+    --headings-color: #231820;
+    --code-span-bg: #f6f8fa;
+    --code-span-color: #d73a49;
+    --code-block-bg: #011627;
+    --code-block-color: #f6f8fa;
+    --focus-ring: rgba(66, 153, 225, 0.6);
+    --select-color: rgba(66, 153, 225, 0.4);
+    --horizontal-rule-color: #eaeaea;
+    --button-bg: #edf2f7;
+    --button-bg-hover: #e2e8f0;
+    --button-bg-active: #cbd5e0;
+    --input-border: #cbd5e0;
+    --input-border-hover: #a0aec0;
+    --input-placeholder: #a0aec0;
+    --primary: #005eca;
+    --primary-opposite: var(--bg);
+    --primary-hover: #0a52a5;
+    --primary-active: #0b3c74;
+}
+
+html {
+    font-size: 1rem;
+}
+
+@media (max-width: 380px) {
+    html {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 1900px) {
+    html {
+        font-size: 1.5rem;
+    }
+}
+
+@media (min-width: 2500px) {
+    html {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 3000px) {
+    html {
+        font-size: 2.5rem;
+    }
+}
+
+@media (min-width: 3400px) {
+    html {
+        font-size: 3rem;
+    }
+}
+
+main {
+    width: 100%;
+    padding: 12.5rem 15%;
+    margin: 0;
+}
+
+.landing {
+    padding-right: 25%;
+    margin-bottom: 5rem;
+}
+
+.project {
+    width: 100%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    margin: 2.5rem 0;
+}
+
+.project:hover {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.project img {
+    width: 40%;
+}
+
+.project .text {
+    padding-right: 5rem;
+}
+
+@media (max-width: 768px) {
+    .landing {
+        padding-right: 0;
+    }
+
+    .landing h1 {
+        font-size: 1.75rem;
+    }
+
+    main {
+        padding: 7.5rem 12.5%;
+    }
+}
+
+@media (max-width: 970px) {
+    .project {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .project img {
+        width: 100%;
+    }
+
+    .project .text {
+        padding: 3rem;
+    }
+}
