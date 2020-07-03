@@ -8,9 +8,10 @@ import document from 'min-document'
 import postcss from 'postcss'
 import cssnano from 'cssnano'
 import autoprefixer from 'autoprefixer'
-import server from 'live-server'
 import chokidar from 'chokidar'
 import ora from 'ora'
+// import StaticServer from 'static-server'
+import { createServer } from './server.js'
 
 const {
     copySync,
@@ -67,7 +68,6 @@ async function build() {
             writeFileSync(filePath, result.css)
         }
 
-        // Call transform() many times without the overhead of starting a service
         const compiled = await Promise.all(services)
         compiled.forEach(async (file, index) => {
             const filePath = join(baseDir, jsFiles[index])
@@ -203,15 +203,8 @@ if (onWatchMode) {
     watcher.on('add', build)
     watcher.on('ready', async () => {
         await build()
-        server.start({
-            port: 3000,
-            host: '0.0.0.0',
-            root: '__dhow__',
-            open: true,
-        })
+        const server = createServer()
     })
-
-    // process.stdin.resume()
 
     function exitHandler() {
         watcher.close()

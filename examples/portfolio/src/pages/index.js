@@ -7,7 +7,7 @@ import matter from 'gray-matter'
 const Home = ({ projects }) => (
     <main>
         <div class="landing" data-aos="fade-in">
-            <h1 class="animated-letters">
+            <h1>
                 Hi! I’m Kartik Nair, a software engineer and designer. I build
                 user friendly web applications & tooling for developers
             </h1>

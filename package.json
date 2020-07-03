@@ -21,9 +21,9 @@
         "chokidar": "^3.4.0",
         "cssnano": "^4.1.10",
         "esbuild": "^0.5.14",
+        "express": "^4.17.1",
         "fast-glob": "^3.2.4",
         "fs-extra": "^9.0.1",
-        "live-server": "^1.2.1",
         "min-document": "^2.19.0",
         "ora": "^4.0.4",
         "postcss": "^7.0.32"
