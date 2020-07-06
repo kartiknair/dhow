@@ -1,8 +1,27 @@
 # Dhow
 
-> **Note**: this is a work in progress
+![npm version](https://img.shields.io/npm/v/dhow) ![Dependency status](https://img.shields.io/librariesio/release/npm/dhow) ![License](https://img.shields.io/npm/l/dhow)
 
 JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML.
+
+-   [Getting Started](#getting-started)
+-   [What it does](#what-it-does)
+-   [How it works](#how-it-works)
+-   [Contributing](#contributing)
+
+## Getting Started
+
+Getting started is very simple. You can use the [`create-dhow-app`](https://github.com/kartiknair/create-dhow-app) npm package to quickly bootstrap a project based on a template.
+
+```shell
+npx create-dhow-app my-app # Optionally specify a template like this: `--template blog`
+
+# For older versions of npm
+npm i -g create-dhow-app
+create-dhow-app my-app
+```
+
+The default template will show you the basic structure of a Dhow app but using something like the blog template will show you everything Dhow can offer.
 
 ## What it does
 
@@ -131,3 +150,15 @@ export const getProps = async (slug) => {
 
 export default Post
 ```
+
+## How it works
+
+Behind the scenes Dhow is actually pretty simple, it uses [`min-document`](https://github.com/Raynos/min-document) & [`esbuild`](https://github.com/evanw/esbuild) to create fake DOM nodes from your JSX.
+
+As a CLI tool Dhow takes `.js` files from your `src/pages` directory & uses esbuild to compile it into non-JSX. Then it calls your default export function and appends the element it returns to a `.dhow` div in the document. If you do export a `Head` function then the contents of that are added to the `<head>` of the document. Then the `outerHTML` of this document is saved into an `html` file corresponding to the path of your source file.
+
+If you export a `getProps` function then the results of that function are passed to your default & `Head` component. If you export a `getPaths` function then the same file is evalauated once for each path. Each path is also passed to `getProps` (if it exists) so you can fetch path specific data. While it is not necessary you can use square brackets around the name of a file that exports a `getPaths` function to remain true to Next.js (e.g `[fileName].js`)
+
+## Contributing
+
+Feel free to add any features you might find useful. Just open an issue and we can go there. If you find a bug you can also open an issue but please make sure to include details like your system, node version, etc.
