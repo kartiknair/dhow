@@ -108,6 +108,10 @@ async function build() {
             pages = pages.filter(
                 (page) => page !== `${outDir}/src/pages/_document.js`
             )
+        } else {
+            const containerDiv = document.createElement('div')
+            containerDiv.className += 'dhow'
+            document.body.appendChild(containerDiv)
         }
 
         for (let page of pages) {
@@ -199,8 +203,8 @@ if (onWatchMode) {
         ignoreInitial: true,
     })
 
-    watcher.on('change', build)
-    watcher.on('add', build)
+    watcher.on('change', async () => await build())
+    watcher.on('add', async () => await build())
     watcher.on('ready', async () => {
         await build()
         const server = createServer()

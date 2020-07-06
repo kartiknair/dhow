@@ -117,3 +117,6 @@ dist
 
 # For vercel deployments
 .vercel/
+
+# Dhow
+__dhow__/
