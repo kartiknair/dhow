@@ -23,6 +23,48 @@ create-dhow-app my-app
 
 The default template will show you the basic structure of a Dhow app but using something like the blog template will show you everything Dhow can offer.
 
+### Create a project from scratch
+
+If you would like you can also create a project from scratch without using `create-dhow-app`. Let's walk through it.
+
+```shell
+# make a directory for your project
+mkdir my-app
+
+# change your directory
+cd my-app
+
+# initialize npm (optionally using `-y`)
+npm init -y
+
+# install dhow
+npm i dhow
+
+# create a `src/pages` directory
+mkdir src && cd src && mkdir pages
+```
+
+Once you're at this point add a few `.js` files to the `src/pages` directory. After that we can set up our scripts in `package.json`. We're gonna add two scripts `dev` to start the Dhow dev server & `build` to build the files a single time. Also I'm going to set the `type` to `module` so we can use ES Modules syntax.
+
+```diff
+{
+    "name": "my-app",
+    "version": "1.0.0",
+    "description": "Basic example using Dhow as a Static Site Generator",
+    "main": "index.js",
++    "scripts": {
++        "dev": "dhow -w",
++        "build": "dhow"
++    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "dhow": "^1.2.1"
+    },
++    "type": "module"
+}
+```
+
 ## What it does
 
 Dhow is basically a transpiler. It takes a `.js` file like this:
