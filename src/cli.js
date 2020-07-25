@@ -10,7 +10,6 @@ import cssnano from 'cssnano'
 import autoprefixer from 'autoprefixer'
 import chokidar from 'chokidar'
 import ora from 'ora'
-// import StaticServer from 'static-server'
 import { createServer } from './server.js'
 
 const {
