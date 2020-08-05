@@ -6,8 +6,6 @@ import fse from 'fs-extra'
 import esbuild from 'esbuild'
 import document from 'min-document'
 import postcss from 'postcss'
-import cssnano from 'cssnano'
-import autoprefixer from 'autoprefixer'
 import chokidar from 'chokidar'
 import ora from 'ora'
 import { createServer } from './server.js'
@@ -57,7 +55,17 @@ async function build() {
             copySync(join(srcDir, 'public'), baseDir)
 
         const cssFiles = fg.sync(`${outDir}/**/*.css`)
-        const processor = postcss([autoprefixer, cssnano])
+
+        let postcssPlugins = []
+
+        if (existsSync(join(cwd, 'postcss.config.js'))) {
+            const postcssConfig = await import(
+                join('file:///', cwd, 'postcss.config.js')
+            )
+            postcssPlugins = postcssConfig.default.plugins
+        }
+
+        const processor = postcss(postcssPlugins)
 
         for (let file of cssFiles) {
             const filePath = join(cwd, file)

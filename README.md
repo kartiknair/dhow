@@ -65,6 +65,12 @@ Once you're at this point add a few `.js` files to the `src/pages` directory. Af
 }
 ```
 
+## CSS Files
+
+Dhow uses [PostCSS](https://github.com/postcss/postcss) under the hood to process all your CSS files. This means you can create a `postcss.config.js` file in the root of your directory, and Dhow will use the plugins you use in that file (you can see this in the [TailwindCSS example](https://github.com/kartiknair/dhow/tree/master/examples/tailwind)).
+
+> Note: Dhow unlike some bundlers (like Parcel) uses **no plugins by default**
+
 ## What it does
 
 Dhow is basically a transpiler. It takes a `.js` file like this:
