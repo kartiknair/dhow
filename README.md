@@ -1,8 +1,8 @@
 # Dhow
 
-![npm version](https://img.shields.io/npm/v/dhow) ![Dependency status](https://img.shields.io/librariesio/release/npm/dhow) ![License](https://img.shields.io/npm/l/dhow)
+![npm version](https://img.shields.io/npm/v/dhow) ![License](https://img.shields.io/npm/l/dhow)
 
-JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML.
+JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
 
 -   [Getting Started](#getting-started)
 -   [What it does](#what-it-does)
