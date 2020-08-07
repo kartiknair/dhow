@@ -14,15 +14,15 @@ const cli = sade('dhow')
 cli.version('2.0.0')
     .option(
         '-i, --indir',
-        'Choose a directory instead of `src/pages` for your files.'
+        'Change input directory for your files. (defaults to `./pages`)'
     )
     .option(
         '-o, --outdir',
-        'Choose a directory instead of `out` for your `build` command.'
+        'Change output directory of your `build` command. (defaults to `./out`)'
     )
     .option(
         '-d, --devdir',
-        'Choose a directory instead of `__dhow__` to store your temporary development builds'
+        'Change directory where your temporary development builds are stored. (defaults to `./__dhow__`)'
     )
 
 cli.command('dev')
@@ -35,7 +35,7 @@ cli.command('build')
 
 cli.parse(process.argv)
 
-function dhowDev({ indir = 'src', devdir = '__dhow__' }) {
+function dhowDev({ indir = 'pages', devdir = '__dhow__' }) {
     process.env.NODE_ENV = 'development'
 
     const watcher = chokidar.watch(indir, {
@@ -89,9 +89,12 @@ function dhowDev({ indir = 'src', devdir = '__dhow__' }) {
     process.on('uncaughtException', exitHandler)
 }
 
-function dhowProd({ indir = 'src', outdir = 'out' }) {
+function dhowProd({ indir = 'pages', outdir = 'out' }) {
+    removeSync(outdir)
+
     process.env.NODE_ENV = 'production'
 
     console.log('Building production build')
+
     build(indir, outdir)
 }

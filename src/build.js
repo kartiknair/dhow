@@ -1,7 +1,8 @@
 const {
     join,
     resolve,
-    posix: { join: posixJoin },
+    dirname,
+    posix: { join: posixJoin, normalize: posixNormalize },
 } = require('path')
 const fg = require('fast-glob')
 const {
@@ -35,7 +36,7 @@ async function build(indir, outdir) {
 
     // Start the esbuild child process once
     const service = await startService()
-    const jsFiles = fg.sync(posixJoin(indir, '/pages/**/*.js'))
+    const jsFiles = fg.sync(posixJoin(indir, '/**/*.js'))
 
     const services = jsFiles.map((file) => {
         ensureFileSync(join(basedir, file))
@@ -61,8 +62,8 @@ async function build(indir, outdir) {
 
         let postcssPlugins = null
 
-        if (existsSync('./postcss.config.js')) {
-            const postcssConfig = require('./postcss.config.js')
+        if (existsSync(resolve('postcss.config.js'))) {
+            const postcssConfig = require(resolve('postcss.config.js'))
             postcssPlugins = postcssConfig.plugins
         }
 
@@ -83,13 +84,13 @@ async function build(indir, outdir) {
 
         await Promise.all(services)
 
-        let pages = fg.sync(posixJoin(outdir, indir, 'pages/**/*.js'))
+        let pages = fg.sync(posixJoin(outdir, indir, '/**/*.js'))
 
-        if (pages.includes(posixJoin(outdir, indir, '/pages/_document.js'))) {
+        if (pages.includes(posixJoin(outdir, indir, '/_document.js'))) {
             const customDocument = require(join(
                 basedir,
                 indir,
-                'pages/_document.js'
+                '_document.js'
             )).default()
 
             const bodyEl = customDocument.getElementsByTagName('body')[0]
@@ -113,8 +114,7 @@ async function build(indir, outdir) {
             })
 
             pages = pages.filter(
-                (page) =>
-                    page !== posixJoin(outdir, indir, 'pages/_document.js')
+                (page) => page !== posixJoin(outdir, indir, '_document.js')
             )
         } else {
             const containerDiv = document.createElement('div')
@@ -123,18 +123,16 @@ async function build(indir, outdir) {
         }
 
         for (let page of pages) {
-            const fileExports = require(join(cwd, page))
+            const fileExports = require(resolve(page))
 
-            let filePath = page.split('/').slice(3).join('/')
-            filePath = filePath.slice(0, filePath.length - 3)
+            const filePath = posixNormalize(page)
+                .split('/')
+                .slice(1 + posixNormalize(indir).split('/').length)
+                .join('/')
+                .slice(0, -3)
 
             if (typeof fileExports.default === 'function') {
                 if (typeof fileExports.getPaths === 'function') {
-                    filePath = join(
-                        basedir,
-                        filePath.split('/').slice(0, -1).join('/')
-                    )
-
                     const paths = await fileExports.getPaths()
 
                     for (let path of paths) {
@@ -145,13 +143,10 @@ async function build(indir, outdir) {
                         writePageDOM(
                             fileExports.default(props),
                             fileExports.Head ? fileExports.Head(props) : [],
-                            join(filePath, path, 'index.html')
+                            join(basedir, path, 'index.html')
                         )
                     }
                 } else {
-                    if (filePath.endsWith('index')) filePath = ''
-                    filePath = join(basedir, filePath, 'index.html')
-
                     const props = fileExports.getProps
                         ? await fileExports.getProps()
                         : {}
@@ -159,14 +154,19 @@ async function build(indir, outdir) {
                     writePageDOM(
                         fileExports.default(props),
                         fileExports.Head ? fileExports.Head(props) : [],
-                        filePath
+                        join(
+                            basedir,
+                            filePath.endsWith('index') ? '' : filePath,
+                            'index.html'
+                        )
                     )
                 }
             } else
-                throw `Default export from a file in ${indir}/pages must be a funtion`
+                throw `Default export from a file in ${indir} must be a funtion`
         }
     } finally {
         removeSync(join(basedir, indir))
+
         // The child process can be explicitly killed when it's no longer needed
         service.stop()
     }
