@@ -17,7 +17,7 @@ cli.version('2.0.0').option(
 )
 
 cli.command('dev')
-    .describe('Start the dev server, & rebuild static files on file change')
+    .describe('Start the dev server, & rebuilds static files on file change')
     .action(dhowDev)
     .option(
         '-d, --devdir',

@@ -1,7 +1,6 @@
 const {
     join,
     resolve,
-    dirname,
     posix: { join: posixJoin, normalize: posixNormalize },
 } = require('path')
 const fg = require('fast-glob')
