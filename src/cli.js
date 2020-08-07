@@ -17,6 +17,7 @@ const chokidar = require('chokidar')
 const ora = require('ora')
 const sirv = require('sirv')
 const polka = require('polka')
+const chalk = require('chalk')
 
 const onWatchMode =
     process.argv.includes('-w') || process.argv.includes('--watch')
@@ -222,14 +223,18 @@ if (onWatchMode) {
         await buildWithSpinner()
 
         const assets = sirv(baseDir, {
-            maxAge: 31536000,
-            immutable: true,
+            dev: true,
         })
 
         polka()
             .use(assets)
             .listen(3000, (err) => {
                 if (err) throw err
+                console.log(
+                    `Dev server is live on: ${chalk.cyan(
+                        'https://localhost:3000'
+                    )}\n`
+                )
             })
     })
 
