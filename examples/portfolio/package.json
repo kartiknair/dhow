@@ -11,7 +11,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "dhow": "^1.2.1",
+        "dhow": "^2.0.0",
         "gray-matter": "^4.0.2"
     }
 }

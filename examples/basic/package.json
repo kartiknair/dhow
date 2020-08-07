@@ -9,5 +9,7 @@
     },
     "author": "",
     "license": "MIT",
-    "dependencies": {}
+    "dependencies": {
+        "dhow": "^2.0.0"
+    }
 }
