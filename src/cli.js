@@ -11,15 +11,14 @@ const build = require('./build')
 
 const cli = sade('dhow')
 
-cli.version('2.0.0')
-    .option(
-        '-i, --indir',
-        'Change input directory for your files. (defaults to `./pages`)'
-    )
-    .option(
-        '-o, --outdir',
-        'Change output directory of your `build` command. (defaults to `./out`)'
-    )
+cli.version('2.0.0').option(
+    '-i, --indir',
+    'Change input directory for your files. (defaults to `./pages`)'
+)
+
+cli.command('dev')
+    .describe('Start the dev server, & rebuild static files on file change')
+    .action(dhowDev)
     .option(
         '-d, --devdir',
         'Change directory where your temporary development builds are stored. (defaults to `./__dhow__`)'
@@ -29,13 +28,13 @@ cli.version('2.0.0')
         'Change port for `dev server`. (defaults to process.env.PORT or `3000`)'
     )
 
-cli.command('dev')
-    .describe('Start the dev server, & rebuild static files on file change')
-    .action(dhowDev)
-
 cli.command('build')
     .describe('Build production ready static files')
     .action(dhowProd)
+    .option(
+        '-o, --outdir',
+        'Change output directory of your `build` command. (defaults to `./out`)'
+    )
 
 cli.parse(process.argv)
 
