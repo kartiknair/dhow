@@ -1,9 +1,6 @@
-import chai from 'chai'
-import Dhow from '../src/jsx-runtime.mjs'
-import esbuild from 'esbuild'
-
-const { expect } = chai
-const { startService } = esbuild
+const { expect } = require('chai')
+const Dhow = require('../src/jsx-runtime.js')
+const { startService } = require('esbuild')
 
 describe('JSX Runtime', function () {
     before(async function () {

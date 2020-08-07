@@ -9,8 +9,5 @@
     },
     "author": "",
     "license": "MIT",
-    "dependencies": {
-        "dhow": "^1.2.1"
-    },
-    "type": "module"
+    "dependencies": {}
 }

@@ -1,15 +1,7 @@
 #!/usr/bin/env node
 
-import { join } from 'path'
-import fg from 'fast-glob'
-import fse from 'fs-extra'
-import esbuild from 'esbuild'
-import document from 'min-document'
-import postcss from 'postcss'
-import chokidar from 'chokidar'
-import ora from 'ora'
-import { createServer } from './server.js'
-
+const { join } = require('path')
+const fg = require('fast-glob')
 const {
     copySync,
     readFileSync,
@@ -17,8 +9,14 @@ const {
     writeFileSync,
     removeSync,
     existsSync,
-} = fse
-const { startService } = esbuild
+} = require('fs-extra')
+const { startService } = require('esbuild')
+const document = require('min-document')
+const postcss = require('postcss')
+const chokidar = require('chokidar')
+const ora = require('ora')
+const sirv = require('sirv')
+const polka = require('polka')
 
 const onWatchMode =
     process.argv.includes('-w') || process.argv.includes('--watch')
@@ -26,25 +24,35 @@ const cwd = process.cwd()
 const outDir = onWatchMode ? '__dhow__' : 'out'
 const baseDir = join(cwd, outDir)
 const srcDir = join(cwd, 'src')
-let randomQuery = 0 // Used to invalidate dynamic import cache
 
 // Async wrapper
 async function build() {
+    // Clear the require cache
+    for (const file of Object.keys(require.cache)) {
+        if (file.startsWith(baseDir)) {
+            delete require.cache[file]
+        }
+    }
+
     document.body.childNodes = []
     document.head.childNodes = []
 
-    const spinner = ora('Building...').start()
-    // Random enough for this purpose
-    randomQuery = Math.floor(Math.random() * 10000000)
-
     // Start the esbuild child process once
     const service = await startService()
-    const jsFiles = fg.sync('src/**/*.js')
+    const jsFiles = fg.sync('src/pages/**/*.js')
 
     const services = jsFiles.map((file) => {
         ensureFileSync(join(baseDir, file))
-        return service.transform(readFileSync(file), {
-            loader: 'jsx',
+
+        return service.build({
+            entryPoints: [file],
+            outfile: join(baseDir, file),
+            bundle: true,
+            platform: 'node',
+            format: 'cjs',
+            loader: {
+                '.js': 'jsx',
+            },
             jsxFactory: 'Dhow.el',
             jsxFragment: 'Dhow.fragment',
         })
@@ -59,49 +67,45 @@ async function build() {
         let postcssPlugins = []
 
         if (existsSync(join(cwd, 'postcss.config.js'))) {
-            const postcssConfig = await import(
-                join('file:///', cwd, 'postcss.config.js')
-            )
-            postcssPlugins = postcssConfig.default.plugins
+            const postcssConfig = require(join(cwd, 'postcss.config.js'))
+            postcssPlugins = postcssConfig.plugins
         }
 
-        const processor = postcss(postcssPlugins)
+        if (!postcssPlugins === []) {
+            const cssProcessor = postcss(postcssPlugins)
 
-        for (let file of cssFiles) {
-            const filePath = join(cwd, file)
-            const result = await processor.process(readFileSync(filePath), {
-                from: filePath,
-            })
-            writeFileSync(filePath, result.css)
+            for (let file of cssFiles) {
+                const filePath = join(cwd, file)
+                const result = await cssProcessor.process(
+                    readFileSync(filePath),
+                    {
+                        from: filePath,
+                    }
+                )
+                writeFileSync(filePath, result.css)
+            }
         }
 
-        const compiled = await Promise.all(services)
-        compiled.forEach(async (file, index) => {
-            const filePath = join(baseDir, jsFiles[index])
-            writeFileSync(filePath, file.js)
-        })
+        await Promise.all(services)
 
         let pages = fg.sync(`${outDir}/src/pages/**/*.js`)
 
         if (pages.includes(`${outDir}/src/pages/_document.js`)) {
-            const customDocumentExports = await import(
-                join(
-                    'file:///',
-                    baseDir,
-                    `./src/pages/_document.js?randomQueryString=${randomQuery}`
-                )
+            const customDocument = require(join(
+                baseDir,
+                './src/pages/_document.js'
+            )).default()
+
+            const bodyEl = customDocument.getElementsByTagName('body')[0]
+            const headEl = customDocument.getElementsByTagName('head')[0]
+
+            Object.entries(customDocument._attributes[null]).forEach(
+                ([key, value]) => {
+                    document
+                        .getElementsByTagName('html')[0]
+                        .setAttribute(key, value.value.toString())
+                }
             )
-
-            const htmlEl = customDocumentExports.default()
-
-            const bodyEl = htmlEl.getElementsByTagName('body')[0]
-            const headEl = htmlEl.getElementsByTagName('head')[0]
-
-            Object.entries(htmlEl._attributes[null]).forEach(([key, value]) => {
-                document
-                    .getElementsByTagName('html')[0]
-                    .setAttribute(key, value.value.toString())
-            })
 
             // Have to use Array.from for `min-document` specific reasons
             Array.from(bodyEl.childNodes).forEach((childNode) => {
@@ -122,13 +126,7 @@ async function build() {
         }
 
         for (let page of pages) {
-            const fileExports = await import(
-                join(
-                    'file:///',
-                    cwd,
-                    `./${page}?randomQueryString=${randomQuery}`
-                )
-            )
+            const fileExports = require(join(cwd, `./${page}`))
 
             let filePath = page.split('/').slice(3).join('/')
             filePath = filePath.slice(0, filePath.length - 3)
@@ -170,12 +168,6 @@ async function build() {
             } else
                 throw 'Default export from a file in src/pages must be a funtion'
         }
-
-        spinner.succeed('Built successfully...')
-    } catch (err) {
-        spinner.fail(err)
-        console.error(err)
-        process.exit(1)
     } finally {
         removeSync(join(baseDir, 'src'))
         // The child process can be explicitly killed when it's no longer needed
@@ -210,11 +202,35 @@ if (onWatchMode) {
         ignoreInitial: true,
     })
 
-    watcher.on('change', async () => await build())
-    watcher.on('add', async () => await build())
+    const spinner = ora('Building...')
+
+    const buildWithSpinner = async () => {
+        spinner.start()
+
+        try {
+            await build()
+            spinner.succeed('Built successfully...')
+        } catch (err) {
+            spinner.fail(err)
+            console.error(err)
+        }
+    }
+
+    watcher.on('change', async () => await buildWithSpinner())
+    watcher.on('add', async () => await buildWithSpinner())
     watcher.on('ready', async () => {
-        await build()
-        const server = createServer()
+        await buildWithSpinner()
+
+        const assets = sirv(baseDir, {
+            maxAge: 31536000,
+            immutable: true,
+        })
+
+        polka()
+            .use(assets)
+            .listen(3000, (err) => {
+                if (err) throw err
+            })
     })
 
     function exitHandler() {

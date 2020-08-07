@@ -10,7 +10,6 @@
     "keywords": [],
     "author": "",
     "license": "MIT",
-    "type": "module",
     "dependencies": {
         "dhow": "^1.2.1",
         "gray-matter": "^4.0.2"

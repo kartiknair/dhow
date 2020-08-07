@@ -1,7 +1,5 @@
-import tailwind from 'tailwindcss'
-
-export default {
+module.exports = {
     theme: {},
     variants: {},
-    plugins: [tailwind],
+    plugins: [require('tailwindcss')],
 }
