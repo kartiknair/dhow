@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "dhow -w",
-        "build": "dhow"
+        "dev": "dhow dev",
+        "build": "dhow build"
     },
     "keywords": [],
     "author": "",

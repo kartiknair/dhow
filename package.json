@@ -14,6 +14,7 @@
     "license": "MIT",
     "dependencies": {
         "chokidar": "^3.4.1",
+        "dotenv": "^8.2.0",
         "esbuild": "^0.5.26",
         "fast-glob": "^3.2.4",
         "fs-extra": "^9.0.1",
@@ -21,6 +22,7 @@
         "ora": "^4.0.5",
         "polka": "^0.5.2",
         "postcss": "^7.0.32",
+        "sade": "^1.7.3",
         "sirv": "^1.0.5"
     },
     "devDependencies": {
