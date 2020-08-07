@@ -24,6 +24,10 @@ cli.version('2.0.0')
         '-d, --devdir',
         'Change directory where your temporary development builds are stored. (defaults to `./__dhow__`)'
     )
+    .option(
+        '-p, --port',
+        'Change port for `dev server`. (defaults to process.env.PORT or `3000`)'
+    )
 
 cli.command('dev')
     .describe('Start the dev server, & rebuild static files on file change')
@@ -35,7 +39,7 @@ cli.command('build')
 
 cli.parse(process.argv)
 
-function dhowDev({ indir = 'pages', devdir = '__dhow__' }) {
+function dhowDev({ indir = 'pages', devdir = '__dhow__', port = 3000 }) {
     process.env.NODE_ENV = 'development'
 
     const watcher = chokidar.watch(indir, {
@@ -67,11 +71,11 @@ function dhowDev({ indir = 'pages', devdir = '__dhow__' }) {
 
         polka()
             .use(assets)
-            .listen(3000, (err) => {
+            .listen(process.env.PORT || port, (err) => {
                 if (err) throw err
                 console.log(
                     `Dev server is live on: ${chalk.cyan(
-                        'https://localhost:3000'
+                        `https://localhost:${process.env.PORT || port}`
                     )}\n`
                 )
             })
