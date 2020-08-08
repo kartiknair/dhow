@@ -6,12 +6,12 @@ const {
 } = require('path')
 const fg = require('fast-glob')
 const {
-    copySync,
-    readFileSync,
-    ensureFileSync,
-    writeFileSync,
-    removeSync,
-    existsSync,
+    copy,
+    readFile,
+    ensureFile,
+    writeFile,
+    remove,
+    exists,
 } = require('fs-extra')
 const { startService } = require('esbuild')
 const document = require('min-document')
@@ -36,10 +36,10 @@ async function build(indir, outdir) {
 
     // Start the esbuild child process once
     const service = await startService()
-    const jsFiles = fg.sync(posixJoin(indir, '/**/*.js'))
+    const jsFiles = await fg(posixJoin(indir, '/**/*.js'))
 
-    const services = jsFiles.map((file) => {
-        ensureFileSync(join(basedir, file))
+    const services = jsFiles.map(async (file) => {
+        await ensureFile(join(basedir, file))
 
         return service.build({
             entryPoints: [file],
@@ -56,13 +56,14 @@ async function build(indir, outdir) {
     })
 
     try {
-        if (existsSync(resolve('public'))) copySync(resolve('public'), basedir)
+        if (await exists(resolve('public')))
+            await copy(resolve('public'), basedir)
 
-        const cssFiles = fg.sync(posixJoin(outdir, '/**/*.css'))
+        const cssFiles = await fg(posixJoin(outdir, '/**/*.css'))
 
         let postcssPlugins = null
 
-        if (existsSync(resolve('postcss.config.js'))) {
+        if (await exists(resolve('postcss.config.js'))) {
             const postcssConfig = require(resolve('postcss.config.js'))
             postcssPlugins = postcssConfig.plugins
         }
@@ -73,18 +74,18 @@ async function build(indir, outdir) {
             for (let file of cssFiles) {
                 const filePath = resolve(file)
                 const result = await cssProcessor.process(
-                    readFileSync(filePath),
+                    await readFile(filePath),
                     {
                         from: filePath,
                     }
                 )
-                writeFileSync(filePath, result.css)
+                await writeFile(filePath, result.css)
             }
         }
 
         await Promise.all(services)
 
-        let pages = fg.sync(posixJoin(outdir, indir, '/**/*.js'))
+        let pages = await fg(posixJoin(outdir, indir, '/**/*.js'))
 
         if (pages.includes(posixJoin(outdir, indir, '/_document.js'))) {
             const customDocument = require(join(
@@ -140,7 +141,7 @@ async function build(indir, outdir) {
                             ? await fileExports.getProps(path)
                             : {}
 
-                        writePageDOM(
+                        await writePageDOM(
                             fileExports.default(props),
                             fileExports.Head ? fileExports.Head(props) : [],
                             join(basedir, dirname(filePath), path, 'index.html')
@@ -151,7 +152,7 @@ async function build(indir, outdir) {
                         ? await fileExports.getProps()
                         : {}
 
-                    writePageDOM(
+                    await writePageDOM(
                         fileExports.default(props),
                         fileExports.Head ? fileExports.Head(props) : [],
                         join(
@@ -165,14 +166,14 @@ async function build(indir, outdir) {
                 throw `Default export from a file in ${indir} must be a funtion`
         }
     } finally {
-        removeSync(join(basedir, indir))
+        await remove(join(basedir, indir))
 
         // The child process can be explicitly killed when it's no longer needed
         service.stop()
     }
 }
 
-function writePageDOM(pageDOM, pageHead, path) {
+async function writePageDOM(pageDOM, pageHead, path) {
     const rootEl = document.getElementsByClassName('dhow')[0]
     const headEl = document.getElementsByTagName('head')[0]
 
@@ -182,8 +183,11 @@ function writePageDOM(pageDOM, pageHead, path) {
         headEl.appendChild(node)
     }
 
-    ensureFileSync(path)
-    writeFileSync(path, `<!DOCTYPE html>` + document.documentElement.toString())
+    await ensureFile(path)
+    await writeFile(
+        path,
+        `<!DOCTYPE html>` + document.documentElement.toString()
+    )
 
     rootEl.removeChild(pageDOM)
     for (let node of pageHead) {

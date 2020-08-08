@@ -41,8 +41,9 @@ cli.parse(process.argv)
 function dhowDev({ indir = 'pages', devdir = '__dhow__', port = 3000 }) {
     process.env.NODE_ENV = 'development'
 
-    const watcher = chokidar.watch(indir, {
+    const watcher = chokidar.watch('.', {
         ignoreInitial: true,
+        ignored: (path) => path.startsWith(devdir),
     })
 
     const spinner = ora('Building...')
