@@ -2,6 +2,7 @@ const {
     join,
     resolve,
     posix: { join: posixJoin, normalize: posixNormalize },
+    dirname,
 } = require('path')
 const fg = require('fast-glob')
 const {
@@ -15,8 +16,6 @@ const {
 const { startService } = require('esbuild')
 const document = require('min-document')
 const postcss = require('postcss')
-
-const cwd = process.cwd()
 
 async function build(indir, outdir) {
     require('dotenv').config()
@@ -142,7 +141,7 @@ async function build(indir, outdir) {
                         writePageDOM(
                             fileExports.default(props),
                             fileExports.Head ? fileExports.Head(props) : [],
-                            join(basedir, path, 'index.html')
+                            join(basedir, dirname(filePath), path, 'index.html')
                         )
                     }
                 } else {

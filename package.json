@@ -1,10 +1,10 @@
 {
     "name": "dhow",
     "version": "2.0.0",
-    "description": "",
+    "description": "JSX-powered SSG for Node.js",
     "main": "./src/jsx-runtime.js",
     "bin": {
-        "dhow": "./src/cli.js"
+        "dhow": "src/cli.js"
     },
     "scripts": {
         "test": "mocha"
@@ -28,5 +28,17 @@
     "devDependencies": {
         "chai": "^4.2.0",
         "mocha": "^8.1.1"
-    }
+    },
+    "directories": {
+        "example": "examples",
+        "test": "test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kartiknair/dhow.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kartiknair/dhow/issues"
+    },
+    "homepage": "https://github.com/kartiknair/dhow#readme"
 }
