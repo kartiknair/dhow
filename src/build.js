@@ -21,7 +21,7 @@ const cwd = process.cwd()
 async function build(indir, outdir) {
     require('dotenv').config()
 
-    const basedir = join(cwd, outdir)
+    const basedir = resolve(outdir)
 
     // Clear the require cache
     for (const file of Object.keys(require.cache)) {
@@ -70,7 +70,7 @@ async function build(indir, outdir) {
             const cssProcessor = postcss(postcssPlugins)
 
             for (let file of cssFiles) {
-                const filePath = join(cwd, file)
+                const filePath = resolve(file)
                 const result = await cssProcessor.process(
                     readFileSync(filePath),
                     {
