@@ -30,7 +30,9 @@ async function build(indir, outdir) {
     }
 
     document.body.childNodes = []
+    document.body.innerHTML = ''
     document.head.childNodes = []
+    document.head.innerHTML = ''
 
     // Start the esbuild child process once
     const service = await startService()
