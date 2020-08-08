@@ -4,15 +4,14 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "dhow -w",
-        "build": "dhow"
+        "dev": "dhow dev -i src/pages",
+        "build": "dhow build -i src/pages"
     },
     "keywords": [],
     "author": "",
     "license": "MIT",
-    "type": "module",
     "dependencies": {
-        "dhow": "^1.2.1",
+        "dhow": "^2.0.0",
         "gray-matter": "^4.0.2"
     }
 }

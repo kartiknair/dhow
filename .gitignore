@@ -120,3 +120,6 @@ dist
 
 # Dhow
 __dhow__/
+
+# Ignore `pacakge-lock` in examples
+examples/package-lock.json/

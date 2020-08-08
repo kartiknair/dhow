@@ -1,8 +1,8 @@
 # Dhow
 
-![npm version](https://img.shields.io/npm/v/dhow) ![Dependency status](https://img.shields.io/librariesio/release/npm/dhow) ![License](https://img.shields.io/npm/l/dhow)
+![npm version](https://img.shields.io/npm/v/dhow) ![License](https://img.shields.io/npm/l/dhow)
 
-JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML.
+JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
 
 -   [Getting Started](#getting-started)
 -   [What it does](#what-it-does)
@@ -40,11 +40,11 @@ npm init -y
 # install dhow
 npm i dhow
 
-# create a `src/pages` directory
-mkdir src && cd src && mkdir pages
+# create a `./pages` directory
+mkdir pages
 ```
 
-Once you're at this point add a few `.js` files to the `src/pages` directory. After that we can set up our scripts in `package.json`. We're gonna add two scripts `dev` to start the Dhow dev server & `build` to build the files a single time. Also I'm going to set the `type` to `module` so we can use ES Modules syntax.
+Once you're at this point add a few `.js` files to the `./pages` directory. After that we can set up our scripts in `package.json`. We're gonna add two scripts `dev` to start the Dhow dev server & `build` to build the files a single time.
 
 ```diff
 {
@@ -53,15 +53,14 @@ Once you're at this point add a few `.js` files to the `src/pages` directory. Af
     "description": "Basic example using Dhow as a Static Site Generator",
     "main": "index.js",
 +    "scripts": {
-+        "dev": "dhow -w",
-+        "build": "dhow"
++        "dev": "dhow dev",
++        "build": "dhow build"
 +    },
     "author": "",
     "license": "MIT",
     "dependencies": {
         "dhow": "^1.2.1"
-    },
-+    "type": "module"
+    }
 }
 ```
 
@@ -203,9 +202,9 @@ export default Post
 
 Behind the scenes Dhow is actually pretty simple, it uses [`min-document`](https://github.com/Raynos/min-document) & [`esbuild`](https://github.com/evanw/esbuild) to create fake DOM nodes from your JSX.
 
-As a CLI tool Dhow takes `.js` files from your `src/pages` directory & uses esbuild to compile it into non-JSX. Then it calls your default export function and appends the element it returns to a `.dhow` div in the document. If you do export a `Head` function then the contents of that are added to the `<head>` of the document. Then the `outerHTML` of this document is saved into an `html` file corresponding to the path of your source file.
+As a CLI tool Dhow takes `.js` files from your `./pages` directory & uses esbuild to compile it into non-JSX. Then it calls your default export function and appends the element it returns to a `.dhow` div in the document. If you do export a `Head` function then the contents of that are added to the `<head>` of the document. Then the `outerHTML` of this document is saved into an `html` file corresponding to the path of your source file.
 
-If you export a `getProps` function then the results of that function are passed to your default & `Head` component. If you export a `getPaths` function then the same file is evalauated once for each path. Each path is also passed to `getProps` (if it exists) so you can fetch path specific data. While it is not necessary you can use square brackets around the name of a file that exports a `getPaths` function to remain true to Next.js (e.g `[fileName].js`)
+If you export a `getProps` function then the results of that function are passed to your default & `Head` component. If you export a `getPaths` function then the same file is evalauated once for each path. Each path is also passed to `getProps` (if it exists) so you can fetch path-specific data. While it is not necessary you can use square brackets around the name of a file that exports a `getPaths` function to remain true to Next.js (e.g `[fileName].js`)
 
 ## Contributing
 
