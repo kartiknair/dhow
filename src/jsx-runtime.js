@@ -42,9 +42,14 @@ const createFragment = (props, ...children) => {
     return children
 }
 
-const Dhow = {
-    el: createElement,
-    fragment: createFragment,
+const Head = (props, ...children) => {
+    // TODO: Don't use a global variable
+    global.headContents = children
+    return false
 }
 
-module.exports = Dhow
+module.exports = {
+    el: createElement,
+    fragment: createFragment,
+    Head,
+}

@@ -1,4 +1,4 @@
-import Dhow from 'dhow'
+import Dhow, { Head } from 'dhow'
 import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
 import matter from 'gray-matter'
@@ -12,6 +12,11 @@ const Post = ({
     },
 }) => (
     <article>
+        <Head>
+            <title>{title} - Kartik Nair</title>
+            <meta name="description" content={description} />
+            <link rel="stylesheet" href="/styles/prism.css" />
+        </Head>
         <h2>{title}</h2>
         <p>
             <small>{new Date(date).toDateString()}</small>
@@ -27,18 +32,6 @@ const Post = ({
         `}
         ></script>
     </article>
-)
-
-export const Head = ({
-    post: {
-        data: { title, description },
-    },
-}) => (
-    <>
-        <title>{title} - Kartik Nair</title>
-        <meta name="description" content={description} />
-        <link rel="stylesheet" href="/styles/prism.css" />
-    </>
 )
 
 export const getPaths = async () => {

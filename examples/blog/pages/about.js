@@ -1,7 +1,11 @@
-import Dhow from 'dhow'
+import Dhow, { Head } from 'dhow'
 
 const About = () => (
     <article>
+        <Head>
+            <title>About me</title>
+            <meta name="description" content="A page about me" />
+        </Head>
         <h4>About me</h4>
         <p>
             Hey there! I'm a software engineer and designer based in Dubai.
@@ -31,13 +35,6 @@ const About = () => (
             <a href="https://instagram.com/nairkartik">Instagram</a>
         </p>
     </article>
-)
-
-export const Head = () => (
-    <>
-        <title>About me</title>
-        <meta name="description" content="A page about me" />
-    </>
 )
 
 export default About

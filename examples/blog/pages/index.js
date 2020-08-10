@@ -1,10 +1,17 @@
-import Dhow from 'dhow'
+import Dhow, { Head } from 'dhow'
 import matter from 'gray-matter'
 import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 const App = ({ posts }) => (
     <article>
+        <Head>
+            <title>Kartik Nair's Blog</title>
+            <meta
+                name="description"
+                content="A blog about development, design, and the process of getting better at them"
+            />
+        </Head>
         <h4>Kartik Nair</h4>
         <p>
             Hey there, I'm Kartik Nair. I like creating and writing about
@@ -37,16 +44,6 @@ const App = ({ posts }) => (
             }
         `}</style>
     </article>
-)
-
-export const Head = () => (
-    <>
-        <title>Kartik Nair's Blog</title>
-        <meta
-            name="description"
-            content="A blog about development, design, and the process of getting better at them"
-        />
-    </>
 )
 
 export const getProps = () => {
