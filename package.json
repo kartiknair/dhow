@@ -7,7 +7,7 @@
         "dhow": "src/cli.js"
     },
     "scripts": {
-        "test": "mocha"
+        "test": "uvu -r esbuild-register test"
     },
     "keywords": [],
     "author": "",
@@ -26,8 +26,8 @@
         "sirv": "^1.0.5"
     },
     "devDependencies": {
-        "chai": "^4.2.0",
-        "mocha": "^8.1.1"
+        "esbuild-register": "^1.0.2",
+        "uvu": "^0.3.2"
     },
     "directories": {
         "example": "examples",
