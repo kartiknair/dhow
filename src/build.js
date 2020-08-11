@@ -18,6 +18,7 @@ const document = require('min-document')
 const postcss = require('postcss')
 
 async function build(indir, outdir) {
+    global.headContents = []
     require('dotenv').config()
 
     const basedir = resolve(outdir)
@@ -38,10 +39,8 @@ async function build(indir, outdir) {
     const service = await startService()
     const jsFiles = await fg(posixJoin(indir, '/**/*.js'))
 
-    const services = jsFiles.map(async (file) => {
-        await ensureFile(join(basedir, file))
-
-        return service.build({
+    const services = jsFiles.map(async (file) =>
+        service.build({
             entryPoints: [file],
             outfile: join(basedir, file),
             bundle: true,
@@ -53,7 +52,7 @@ async function build(indir, outdir) {
             jsxFactory: 'Dhow.el',
             jsxFragment: 'Dhow.fragment',
         })
-    })
+    )
 
     try {
         if (await exists(resolve('public')))
@@ -107,11 +106,11 @@ async function build(indir, outdir) {
 
             // Have to use Array.from for `min-document` specific reasons
             Array.from(bodyEl.childNodes).forEach((childNode) => {
-                document.getElementsByTagName('body')[0].appendChild(childNode)
+                document.body.appendChild(childNode)
             })
 
             Array.from(headEl.childNodes).forEach((childNode) => {
-                document.getElementsByTagName('head')[0].appendChild(childNode)
+                document.head.appendChild(childNode)
             })
 
             pages = pages.filter(
@@ -143,7 +142,6 @@ async function build(indir, outdir) {
 
                         await writePageDOM(
                             fileExports.default(props),
-                            fileExports.Head ? fileExports.Head(props) : [],
                             join(basedir, dirname(filePath), path, 'index.html')
                         )
                     }
@@ -154,7 +152,6 @@ async function build(indir, outdir) {
 
                     await writePageDOM(
                         fileExports.default(props),
-                        fileExports.Head ? fileExports.Head(props) : [],
                         join(
                             basedir,
                             filePath.endsWith('index') ? '' : filePath,
@@ -173,14 +170,13 @@ async function build(indir, outdir) {
     }
 }
 
-async function writePageDOM(pageDOM, pageHead, path) {
+async function writePageDOM(pageDOM, path) {
     const rootEl = document.getElementsByClassName('dhow')[0]
-    const headEl = document.getElementsByTagName('head')[0]
 
     rootEl.appendChild(pageDOM)
 
-    for (let node of pageHead) {
-        headEl.appendChild(node)
+    for (let node of global.headContents) {
+        document.head.appendChild(node)
     }
 
     await ensureFile(path)
@@ -190,8 +186,9 @@ async function writePageDOM(pageDOM, pageHead, path) {
     )
 
     rootEl.removeChild(pageDOM)
-    for (let node of pageHead) {
-        headEl.removeChild(node)
+
+    for (let node of global.headContents) {
+        document.head.removeChild(node)
     }
 }
 

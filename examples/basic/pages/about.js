@@ -1,7 +1,10 @@
-import Dhow from 'dhow'
+import Dhow, { Head } from 'dhow'
 
 export default () => (
     <main>
+        <Head>
+            <title>This is the about paage!!!</title>
+        </Head>
         <h1>About me?</h1>
         <p>
             This is an about page. It'll tell you everything you need to know
