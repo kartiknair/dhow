@@ -9,9 +9,9 @@
     },
     "keywords": [],
     "author": "",
-    "license": "ISC",
+    "license": "MIT",
     "dependencies": {
-        "dhow": "^2.0.0",
+        "dhow": "^3.0.0",
         "tailwindcss": "^1.6.2"
     }
 }
