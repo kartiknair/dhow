@@ -8,6 +8,7 @@ const polka = require('polka')
 const chalk = require('chalk')
 const sade = require('sade')
 const build = require('./build')
+const {removeSync} = require('fs-extra')
 
 const cli = sade('dhow')
 
@@ -93,12 +94,18 @@ function dhowDev({ indir = 'pages', devdir = '__dhow__', port = 3000 }) {
     process.on('uncaughtException', exitHandler)
 }
 
-function dhowProd({ indir = 'pages', outdir = 'out' }) {
+async function dhowProd({ indir = 'pages', outdir = 'out' }) {
     removeSync(outdir)
 
     process.env.NODE_ENV = 'production'
 
-    console.log('Building production build')
-
-    build(indir, outdir)
+    const spinner = ora('Building production build...').start()
+    
+    try {
+        await build(indir, outdir)
+        spinner.succeed('Built successfully...')
+    } catch (err) {
+        spinner.fail(err)
+        throw err
+    }
 }
