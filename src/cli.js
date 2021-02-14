@@ -8,7 +8,7 @@ const polka = require('polka')
 const chalk = require('chalk')
 const sade = require('sade')
 const build = require('./build')
-const {removeSync} = require('fs-extra')
+const { removeSync } = require('fs-extra')
 
 const cli = sade('dhow')
 
@@ -76,7 +76,7 @@ function dhowDev({ indir = 'pages', devdir = '__dhow__', port = 3000 }) {
                 if (err) throw err
                 console.log(
                     `Dev server is live on: ${chalk.cyan(
-                        `https://localhost:${process.env.PORT || port}`
+                        `http://localhost:${process.env.PORT || port}`
                     )}\n`
                 )
             })
@@ -100,7 +100,7 @@ async function dhowProd({ indir = 'pages', outdir = 'out' }) {
     process.env.NODE_ENV = 'production'
 
     const spinner = ora('Building production build...').start()
-    
+
     try {
         await build(indir, outdir)
         spinner.succeed('Built successfully...')

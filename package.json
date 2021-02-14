@@ -1,13 +1,13 @@
 {
     "name": "dhow",
-    "version": "3.0.0",
+    "version": "3.0.2",
     "description": "JSX-powered SSG for Node.js",
     "main": "./src/jsx-runtime.js",
     "bin": {
         "dhow": "src/cli.js"
     },
     "scripts": {
-        "test": "uvu -r esbuild-register test"
+        "test": "uvu test"
     },
     "keywords": [],
     "author": "",
@@ -15,19 +15,18 @@
     "dependencies": {
         "chokidar": "^3.4.2",
         "dotenv": "^8.2.0",
-        "esbuild": "^0.6.17",
+        "esbuild": "^0.8.46",
         "fast-glob": "^3.2.4",
         "fs-extra": "^9.0.1",
         "min-document": "^2.19.0",
         "ora": "^4.1.1",
         "polka": "^0.5.2",
-        "postcss": "^7.0.32",
+        "postcss": "^8.2.4",
         "sade": "^1.7.3",
         "sirv": "^1.0.5"
     },
     "devDependencies": {
-        "esbuild-register": "^1.0.2",
-        "uvu": "^0.3.2"
+        "uvu": "^0.5.1"
     },
     "directories": {
         "example": "examples",
