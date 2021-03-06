@@ -10,6 +10,7 @@ JSX-powered SSG for Node.js. Write logic like React with a directory-structure l
 -   [What it does](#what-it-does)
 -   [CSS Files](#css-files)
 -   [The `Head` component](#the-head-component)
+-   [Custom Document](#custom-document)
 -   [How it works](#how-it-works)
 -   [Contributing](#contributing)
 
@@ -258,6 +259,33 @@ export default () => (
 ```
 
 This is similar to the behaviour in other libraries like [Helmet](https://github.com/nfl/react-helmet)
+
+## Custom Document
+
+Similarly to Next.js, Dhow optionally allows you to specify a custom document for shared document-level markup. Just like Next.js you do this by creating a `_document.js` file in your pages directory. This file can export any sort of JSX, with the only requirement being that you must have one element with a `class` of `dhow` nested somewhere within. That element is where Dhow will insert all your page markup during build time.
+
+Here's an example of a custom document used to add some global CSS & scripts to all pages:
+
+```jsx
+/* ./pages/_document.js */
+import Dhow from 'dhow'
+
+const Document = () => (
+    <html lang="en">
+        <head>
+            <link rel="stylesheet" href="/global.css" />
+        </head>
+        <body>
+            <div class="dhow">
+                {/* this is where your page content will end up */}
+            </div>
+            <script src="/global.js"></script>
+        </body>
+    </html>
+)
+
+export default Document
+```
 
 ## How it works
 

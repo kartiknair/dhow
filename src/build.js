@@ -16,6 +16,7 @@ const {
 const { startService } = require('esbuild')
 const document = require('min-document')
 const postcss = require('postcss')
+const { appendChild } = require('./jsx-runtime')
 
 async function build(indir, outdir) {
     global.headContents = []
@@ -173,7 +174,7 @@ async function build(indir, outdir) {
 async function writePageDOM(pageDOM, path) {
     const rootEl = document.getElementsByClassName('dhow')[0]
 
-    rootEl.appendChild(pageDOM)
+    appendChild(rootEl, pageDOM)
 
     for (let node of global.headContents) {
         document.head.appendChild(node)
