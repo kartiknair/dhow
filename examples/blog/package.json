@@ -11,7 +11,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "dhow": "^3.0.2",
+        "dhow": "latest",
         "gray-matter": "^4.0.2",
         "marked": "^1.1.1",
         "prismjs": "^1.21.0"
