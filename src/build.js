@@ -173,7 +173,11 @@ async function build(indir, outdir) {
 async function writePageDOM(pageDOM, path) {
     const rootEl = document.getElementsByClassName('dhow')[0]
 
-    rootEl.appendChild(pageDOM)
+    if (Array.isArray(pageDOM)) {
+        pageDOM.map((el) => rootEl.appendChild(el))
+    } else {
+        rootEl.appendChild(pageDOM);
+    }
 
     for (let node of global.headContents) {
         document.head.appendChild(node)
