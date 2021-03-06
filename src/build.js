@@ -50,6 +50,8 @@ async function build(indir, outdir) {
             loader: {
                 '.js': 'jsx',
             },
+            external: [ 'dhow' ],
+            inject: [ join(__dirname, '/import-shim.js') ],
             jsxFactory: 'Dhow.el',
             jsxFragment: 'Dhow.fragment',
         })
