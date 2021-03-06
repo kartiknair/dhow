@@ -51,5 +51,6 @@ const Head = (props, ...children) => {
 module.exports = {
     el: createElement,
     fragment: createFragment,
+    appendChild,
     Head,
 }
