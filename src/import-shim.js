@@ -1,1 +1,2 @@
-export * as Dhow from 'dhow';
+import * as Dhow from 'dhow'
+export { Dhow }
