@@ -173,13 +173,13 @@ const buildPages = async (fromPath: string, toPath: string) => {
 
             if (head.contents) {
                 documentHead.children.push(...head.contents)
+
+                head.contents = []
             }
 
             const htmlPath = path.join(toPath, routePath, 'index.html')
             fse.outputFile(htmlPath, document.toString())
         }
-
-        head.contents = []
     }
 
     await fse.remove(stagingPath)
