@@ -30,10 +30,10 @@ export class VNode {
     }
 
     toString(): string {
-        const childrenString = this.children.map((c) => c.toString()).join('')
+        let contentString = this.children.map((c) => c.toString()).join('')
 
         if (this.type === Fragment) {
-            return childrenString
+            return contentString
         }
 
         if (this.attributes.className) {
@@ -47,10 +47,16 @@ export class VNode {
             this.attributes.style =  VNode.styleToString(this.attributes.style)
         }
 
+        if (this.attributes.html) {
+            contentString = this.attributes.html
+
+            delete this.attributes.html
+        }
+
         const attributesString = Object.entries(this.attributes)
             .map(([ key, value ]) => ` ${key}="${value}"`).join(' ')
         
-        return `<${this.type}${attributesString}>${childrenString}</${this.type}>`
+        return `<${this.type}${attributesString}>${contentString}</${this.type}>`
     }
 
     find({ id = '', type }: { id?: string, type?: VNode['type'] }): VNode | null {
