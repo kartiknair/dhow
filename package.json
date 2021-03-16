@@ -30,6 +30,7 @@
     "devDependencies": {
         "@types/fs-extra": "^9.0.8",
         "@types/node": "^14.14.33",
+        "@types/polka": "^0.5.2",
         "@types/sade": "^1.7.2",
         "copyfiles": "^2.4.1",
         "onchange": "^7.1.0",
