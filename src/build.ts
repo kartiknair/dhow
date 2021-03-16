@@ -115,7 +115,7 @@ const buildPages = async (fromPath: string, toPath: string) => {
     const stagingPath = path.join(toPath, '.staging')
     await fse.ensureDir(stagingPath)
 
-    // Build all .js files to staging (JSX -> regular JS)
+    // Build all .js files (pages) to staging (JSX -> regular JS)
     {
         const filePaths = await glob(path.join(fromPath, '**/*.js'))
 
@@ -127,13 +127,8 @@ const buildPages = async (fromPath: string, toPath: string) => {
         )
     }
 
-    // Get the paths to all pages (all .js files in the pages directory)
-    const pagesPath = path.join(stagingPath, 'pages')
-    const pagePaths = (await glob(path.join(pagesPath, '**/*.js')))
-        .map((p) => path.parse(p))
-        .filter((p) => p.name !== '_document' && p.name !== '_app')
-
-    const document = getDocument(pagesPath)
+    // Set up the document (VNode tree) into which built html will be inserted
+    const document = getDocument(stagingPath)
     const documentEntry = document.find({ id: 'dhow' }) || document.find({ type: 'body' })
     const documentHead = document.find({ type: 'head' })
 
@@ -145,11 +140,17 @@ const buildPages = async (fromPath: string, toPath: string) => {
         throw new Error('Invalid document, no head found.')
     }
 
-    const Wrapper = getWrapper(pagesPath)
+    // Get the component which will wrap all pages 
+    const Wrapper = getWrapper(stagingPath)
+
+    // Get the paths to all pages (all .js files in staging)
+    const pagePaths = (await glob(path.join(stagingPath, '**/*.js')))
+        .map((p) => path.parse(p))
+        .filter((p) => p.name !== '_document' && p.name !== '_app')
 
     for (const pagePath of pagePaths) {
         const parsedPagePath = path.format(pagePath)
-        const pageDir = pagePath.dir.slice(pagesPath.length)
+        const pageDir = pagePath.dir.slice(stagingPath.length)
 
         const page = readPage(parsedPagePath)
 
