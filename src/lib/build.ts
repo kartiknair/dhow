@@ -24,15 +24,19 @@ const buildJsFile = async (fromFile: string, toFile: string) => {
         entryPoints: [ fromFile ],
         outfile: toFile,
 
-        // Make sure we can `require()` the built files later
+        // Make sure we can run the built files later
         format: 'cjs',
         platform: 'node',
+        // ...without depending on being able to import stuff at runtime
+        bundle: true,
 
         // Support JSX
         loader: { '.js': 'jsx' },
-        inject: [ path.join(__dirname, '/import-shim.js') ],
         jsxFactory: 'Dhow.createElement',
         jsxFragment: 'Dhow.Fragment',
+        // ...and inject the relevant import into every file
+        external: [ 'dhow' ],
+        inject: [ path.join(__dirname, '/import-shim.js') ],
     })
 }
 
@@ -116,16 +120,14 @@ const buildPages = async (fromPath: string, toPath: string) => {
     await fse.ensureDir(stagingPath)
 
     // Build all .js files (pages) to staging (JSX -> regular JS)
-    {
-        const filePaths = await glob(path.join(fromPath, '**/*.js'))
+    const jsFilePaths = await glob(path.join(fromPath, '**/*.js'))
 
-        await Promise.all(
-            filePaths.map((filePath) => buildJsFile(
-                filePath,
-                path.join(stagingPath, filePath.slice(fromPath.length)),
-            ))
-        )
-    }
+    await Promise.all(
+        jsFilePaths.map((filePath) => buildJsFile(
+            filePath,
+            path.join(stagingPath, filePath.slice(fromPath.length)),
+        ))
+    )
 
     // Set up the document (VNode tree) into which built html will be inserted
     const document = getDocument(stagingPath)

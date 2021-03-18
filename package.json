@@ -8,7 +8,7 @@
     },
     "scripts": {
         "build": "tsc",
-        "postbuild": "copyfiles src/*.js dist",
+        "postbuild": "copyfiles -u 1 src/**/*.js dist",
         "dev": "onchange \"src/**/*\" -- npm run build",
         "test": "uvu -r ts-node/register test"
     },
