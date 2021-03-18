@@ -6,17 +6,8 @@ import sirv from 'sirv'
 import polka from 'polka'
 import chokidar from 'chokidar'
 
-import build from './build'
-
-// This file is broken at the moment.
-// TODO: Write custom logger, communicating progress to the user via spinners
-//       is pointless because everything is so fast anyways
-//       Should have wait, sucess, info and a special error printer that
-//       recognises special errors
-//       Use printf-like formatting and native format for colored output
-// TODO: Write a custom error class to be able to distinguish custom and "internal"
-//       errors
-// TODO: Fix development server
+import build from './lib/build'
+import { logger } from './utils'
 
 const dhow = sade('dhow')
 
@@ -32,16 +23,26 @@ type ProductionBuild = ({}: { input: string, output: string }) => Promise<void>
 const buildProduction: ProductionBuild = async ({ input, output }) => {
     process.env.NODE_ENV = 'production'
 
-    // 'Building...'
+    logger.wait('building...')
 
     try {
         await build(input, output)
 
-        // 'Built files to ' + output
+        logger.done('built files to %o', output)
     } catch (err) {
-        // 'Failed building' 
+        logger.error('failed building', err)
+    }
+}
 
-        console.error(err)
+const startDevServer = async (port: number, directory: string) => {
+    const serveStatic = sirv(directory, { dev: true })
+
+    try {
+        await polka().use(serveStatic).listen(port)
+
+        logger.ready('server listening on http://localhost:%o', port)
+    } catch (err) {
+        logger.error(`couldn't start development server`, err)
     }
 }
 
@@ -51,40 +52,31 @@ type DevelopmentBuild =
 const buildDevelopment: DevelopmentBuild = async ({ input, output, port }) => {
     process.env.NODE_ENV = 'development'
 
+    const actualPort = Number(process.env.PORT || port)
+
+    await startDevServer(actualPort, output)
+
     const saneOutput = path.normalize(output)
     const watcher = chokidar.watch('.', {
         ignoreInitial: true,
         ignored: (path: string) => path.startsWith(saneOutput)
+            || path.startsWith('node_modules')
     })
 
-    serverSpinner.start('Starting development server...')
-
-    const actualPort = process.env.PORT || Number(port)
-
-    polka().use(sirv(input, { dev: true })).listen(actualPort, (err: Error) => {
-        if (err) {
-            serverSpinner.fail(`Couldn't start development server`)
-
-            console.error(err)
-        } else {
-            serverSpinner.succeed('Development server listening on '
-                + 'http://localhost:' + actualPort)
-        }
-    })
-
-    watcher.on('change', async () => {
-        buildSpinner.start('Building...')
+    const tryBuild = async () => {
+        logger.wait('building...')
 
         try {
             await build(input, output)
 
-            buildSpinner.succeed('Built changes')
+            logger.done('built changes')
         } catch (err) {
-            buildSpinner.fail(`Couldn't build`)
-
-            console.error(err)
+            logger.error(`failed building`, err)
         }
-    })
+    }
+
+    watcher.on('all', tryBuild)
+    watcher.on('ready', tryBuild)
 }
 
 dhow.command('build')
