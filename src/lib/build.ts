@@ -1,5 +1,6 @@
 import path from 'path'
 import glob from 'fast-glob'
+import postcss from 'postcss'
 import * as fse from 'fs-extra'
 import * as esbuild from 'esbuild'
 
@@ -188,6 +189,31 @@ const buildPages = async (fromPath: string, toPath: string) => {
     await fse.remove(stagingPath)
 }
 
+const processCSS = async (directory: string) => {
+    let plugins = []
+
+    try {
+        plugins = require(path.resolve('postcss.config.js')).plugins
+    } catch (err) {
+        if (err.code !== 'MODULE_NOT_FOUND') {
+            throw err
+        }
+    }
+
+    const processor = postcss(plugins)
+    const cssFiles = (await glob(path.join(directory, '**/*.css')))
+        .map((filePath) => path.resolve(filePath))
+
+    for (const cssFile of cssFiles) {
+        const processed = await processor.process(await fse.readFile(cssFile), {
+            // For source-maps, in case we ever start generating them
+            from: cssFile
+        })
+
+        await fse.writeFile(cssFile, processed.css)
+    }
+}
+
 const build = async (from: string, to: string) => {
     const fromPath = path.resolve(from)
     const toPath = path.resolve(to)
@@ -204,9 +230,10 @@ const build = async (from: string, to: string) => {
     buildPages(fromPath, toPath)
 
     // Copy public folder contents to `to`
-    fse.copy('./public/', toPath)
+    await fse.copy('./public/', toPath)
 
     // Process CSS inside `to`
+    await processCSS(toPath)
 }
 
 export default build
