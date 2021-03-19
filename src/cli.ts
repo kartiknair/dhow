@@ -2,25 +2,15 @@
 
 import path from'path'
 import sade from 'sade'
-import sirv from 'sirv'
-import polka from 'polka'
-import chokidar from 'chokidar'
 
 import build from './lib/build'
-import { logger } from './utils'
+import { logger, watch, serve } from './utils'
 
-const dhow = sade('dhow')
+type ProductionBuild = ({}: { indir: string, outdir: string }) => Promise<void>
 
-dhow.version(require('../package.json').version)
-    .option(
-        '-i, --input',
-        'Sets the directory where files will be read from',
-        'pages',
-    )
-
-type ProductionBuild = ({}: { input: string, output: string }) => Promise<void>
-
-const buildProduction: ProductionBuild = async ({ input, output }) => {
+const buildProduction: ProductionBuild = async ({
+    indir: input, outdir: output,
+}) => {
     process.env.NODE_ENV = 'production'
 
     logger.wait('building...')
@@ -34,36 +24,26 @@ const buildProduction: ProductionBuild = async ({ input, output }) => {
     }
 }
 
-const startDevServer = async (port: number, directory: string) => {
-    const serveStatic = sirv(directory, { dev: true })
-
-    try {
-        await polka().use(serveStatic).listen(port)
-
-        logger.ready('server listening on http://localhost:%o', port)
-    } catch (err) {
-        logger.error(`couldn't start development server`, err)
-    }
-}
-
 type DevelopmentBuild =
-    ({}: { input: string, output: string, port: string }) => Promise<void>
+    ({}: { indir: string, outdir: string, port: string }) => Promise<void>
 
-const buildDevelopment: DevelopmentBuild = async ({ input, output, port }) => {
+const buildDevelopment: DevelopmentBuild = async ({
+    indir: input, outdir: output, port,
+}) => {
     process.env.NODE_ENV = 'development'
 
-    const actualPort = Number(process.env.PORT || port)
+    try {
+        const actualPort = Number(process.env.PORT || port)
+        await serve(output, actualPort)
 
-    await startDevServer(actualPort, output)
+        logger.ready('dev server listening on http://localhost:%o', actualPort)
+    } catch (err) {
+        logger.error('failed starting dev server', err)
 
-    const saneOutput = path.normalize(output)
-    const watcher = chokidar.watch('.', {
-        ignoreInitial: true,
-        ignored: (path: string) => path.startsWith(saneOutput)
-            || path.startsWith('node_modules')
-    })
+        return
+    }
 
-    const tryBuild = async () => {
+    watch('.', async () => {
         logger.wait('building...')
 
         try {
@@ -73,17 +53,23 @@ const buildDevelopment: DevelopmentBuild = async ({ input, output, port }) => {
         } catch (err) {
             logger.error(`failed building`, err)
         }
-    }
-
-    watcher.on('all', tryBuild)
-    watcher.on('ready', tryBuild)
+    }, { ignore: [ 'node_modules', path.normalize(output) ] })
 }
+
+const dhow = sade('dhow')
+
+dhow.version(require('../package.json').version)
+    .option(
+        '-i, --indir',
+        'Sets the directory where files will be read from',
+        'pages',
+    )
 
 dhow.command('build')
     .describe('Compiles your pages for deployment')
     .action(buildProduction)
     .option(
-        '-o, --output',
+        '-o, --outdir',
         'Sets the directory where files will be built to',
         'out',
     )
@@ -93,7 +79,7 @@ dhow.command('dev')
     .describe('Rebuilds your pages on change and hosts them locally')
     .action(buildDevelopment)
     .option(
-        '-o, --output',
+        '-o, --outdir',
         'Sets the directory where files will be built to',
         '.dhow',
     )

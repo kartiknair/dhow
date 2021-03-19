@@ -1,5 +1,8 @@
 import util from 'util'
+import sirv from 'sirv'
+import polka from'polka'
 import chalk from 'chalk'
+import chokidar from 'chokidar'
 
 const createLogger = (name: string, color: chalk.ChalkFunction) => {
     const prefix = color(name) + ' - '
@@ -21,5 +24,26 @@ export const logger = {
     ready: createLogger('ready', chalk.gray),
     wait: createLogger('wait', chalk.magenta),
     done: createLogger('done', chalk.cyan),
+    warn: createLogger('warn', chalk.yellow),
     error: createErrorLogger('error'),
+}
+
+export const watch = (
+    watchPath: string, callback: (...args: any[]) => any,
+    options: { ignore: string[] } = { ignore: [] }
+) => {
+    const watcher = chokidar.watch(watchPath, {
+        ignoreInitial: true,
+        ignored: (path: string) =>
+            options.ignore.filter((i) => path.startsWith(i)).length,
+    })
+
+    watcher.on('all', callback)
+    watcher.on('ready', callback)
+}
+
+export const serve = async (directory: string, port: number) => {
+    const serveStatic = sirv(directory, { dev: true })
+
+    await polka().use(serveStatic).listen(port)
 }
