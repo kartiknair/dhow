@@ -1,195 +1,50 @@
 import path from 'path'
 import glob from 'fast-glob'
 import postcss from 'postcss'
+import process from 'process'
 import * as fse from 'fs-extra'
-import * as esbuild from 'esbuild'
+import * as createDebugLogger from 'debug'
 
-import { head } from './head'
-import { createElement, Component, Props } from './jsx-runtime'
+import { buildPages } from './pages'
 
-const DefaultDocument = (
-    createElement('html', { lang: 'en' },
-        createElement('head', {},
-            createElement('meta', { charset: 'utf-8' })
-        ),
-        createElement('body', {})
-    )
-)
+export const debug = createDebugLogger.default('dhow:build')
 
-const DefaultWrapper = (props: Props = {}) => (
-    createElement(props.Component, props.pageProps)
-)
-
-const buildJsFile = async (fromFile: string, toFile: string) => {
-    return esbuild.build({
-        entryPoints: [ fromFile ],
-        outfile: toFile,
-
-        // Make sure we can run the built files later
-        format: 'cjs',
-        platform: 'node',
-        // ...without depending on being able to import stuff at runtime
-        bundle: true,
-
-        // Support JSX
-        loader: { '.js': 'jsx' },
-        jsxFactory: 'Dhow.createElement',
-        jsxFragment: 'Dhow.Fragment',
-        // ...and inject the relevant import into every file
-        external: [ 'dhow' ],
-        inject: [ path.join(__dirname, '/import-shim.js') ],
-    })
+export type BuildOptions = {
+    initial: boolean,
+    changes: { type: string, path: string }[],
 }
 
-type Page = {
-    default: Component,
-    getPaths?: () => Promise<string[]>,
-    getProps: (path?: string) => Promise<Props>,
-}
+const copyPublic = async (toPath: string, options: BuildOptions) => {
+    const origin = path.join(process.cwd(), 'public')
 
-const readPage = (filePath: string) => {
-    try {
-        const pageModule = require(filePath)
-        const page: Page = {
-            default: pageModule.default,
-            getPaths: pageModule.getPaths || undefined,
-            getProps: pageModule.getProps || (async () => ({})),
+    if (options.initial) {
+        return await fse.copy(origin, toPath)
+    }
+
+    // Assume that content was already copied over so only do what's necessary
+    for (const change of options.changes) {
+        if (!change.path.startsWith(origin)) {
+            continue
         }
 
-        if (typeof page.default !== 'function') {
-            throw new Error('does not `export default` a function')
+        const destination = path.join(change.path.slice(origin.length))
+
+        if (change.type === 'unlink') {
+            debug('deleting %o as part of change %o', destination, change)
+
+            await fse.remove(destination)
         }
 
-        if (typeof page.getProps !== 'function') {
-            throw new Error('has an invalid `getProps` export')
+        if (change.type === 'change' || change.type === 'add') {
+            debug('copying %o to %o as part of change of type %o', destination,
+                change.path, change.type)
+
+            await fse.copy(change.path, destination)
         }
-
-        if (page.getPaths && typeof page.getPaths !== 'function') {
-            throw new Error('has an invalid `getPaths` export')
-        }
-
-        page.getProps = page.getProps || (() => {})
-
-        return page
-    } catch (err) {
-        throw new Error(`Malformed page (${filePath}): ${err.message}`)
     }
 }
 
-const readComponentLike = (filePath: string) => {
-    try {
-        const componentModule = require(filePath)
-        const component: Component = componentModule.default
-
-        if (typeof component !== 'function') {
-            throw new Error('default export is not a function')
-        }
-
-        return component
-    } catch (err) {
-        if (err.code === 'MODULE_NOT_FOUND') {
-            return null
-        }
-
-        throw new Error(`Malformed component (${filePath}): ${err.message}`)
-    }
-}
-
-const getDocument = (pagesPath: string) => {
-    const custom = readComponentLike(path.join(pagesPath, '_document.js'))
-
-    if (custom) {
-        return custom()
-    }
-
-    return DefaultDocument
-}
-
-const getWrapper = (pagesPath: string) => {
-    const custom = readComponentLike(path.join(pagesPath, '_app.js'))
-
-    if (custom) {
-        return custom
-    }
-
-    return DefaultWrapper
-}
-
-const buildPages = async (fromPath: string, toPath: string) => {
-    // Set up a staging directory where temporary .js files will be built into
-    const stagingPath = path.join(toPath, '.staging')
-    await fse.ensureDir(stagingPath)
-
-    // Build all .js files (pages) to staging (JSX -> regular JS)
-    const jsFilePaths = await glob(path.join(fromPath, '**/*.js'))
-
-    await Promise.all(
-        jsFilePaths.map((filePath) => buildJsFile(
-            filePath,
-            path.join(stagingPath, filePath.slice(fromPath.length)),
-        ))
-    )
-
-    // Set up the document (VNode tree) into which built html will be inserted
-    const document = getDocument(stagingPath)
-    const documentEntry = document.find({ id: 'dhow' }) || document.find({ type: 'body' })
-    const documentHead = document.find({ type: 'head' })
-
-    if (!documentEntry) {
-        throw new Error('Invalid document, no entry point found.')
-    }
-
-    if (!documentHead) {
-        throw new Error('Invalid document, no head found.')
-    }
-
-    // Get the component which will wrap all pages 
-    const Wrapper = getWrapper(stagingPath)
-
-    // Get the paths to all pages (all .js files in staging)
-    const pagePaths = (await glob(path.join(stagingPath, '**/*.js')))
-        .map((p) => path.parse(p))
-        .filter((p) => p.name !== '_document' && p.name !== '_app')
-
-    for (const pagePath of pagePaths) {
-        const parsedPagePath = path.format(pagePath)
-        const pageDir = pagePath.dir.slice(stagingPath.length)
-
-        const page = readPage(parsedPagePath)
-
-        // Compute all routes (all folders where a .html file will eventually 
-        // be generated to
-        const routePaths = page.getPaths ? (
-            (await page.getPaths()).map((p) => path.join(pageDir, p))
-        ) : (
-            [ pagePath.name === 'index' ? pageDir : pagePath.name ]
-        )
-
-        for (const routePath of routePaths) {
-            // Strip the previously prepended pageDir from the routePath since 
-            // getProps expects the values that were returned from getPaths
-            const props = await page.getProps(routePath.slice(pageDir.length))
-            const html = createElement(Wrapper, {
-                Component: page.default, pageProps: props
-            }).toString()
-
-            documentEntry.children = [ html ]
-
-            if (head.contents) {
-                documentHead.children.push(...head.contents)
-
-                head.contents = []
-            }
-
-            const htmlPath = path.join(toPath, routePath, 'index.html')
-            fse.outputFile(htmlPath, document.toString())
-        }
-    }
-
-    await fse.remove(stagingPath)
-}
-
-const processCSS = async (directory: string) => {
+const processCSS = async (directory: string, options: BuildOptions) => {
     let plugins = []
 
     try {
@@ -202,19 +57,44 @@ const processCSS = async (directory: string) => {
 
     const processor = postcss(plugins)
     const cssFiles = (await glob(path.join(directory, '**/*.css')))
-        .map((filePath) => path.resolve(filePath))
 
     for (const cssFile of cssFiles) {
-        const processed = await processor.process(await fse.readFile(cssFile), {
+        const filePath = path.resolve(cssFile)
+
+        const relevantChanges = options.changes.filter((c) => (
+            // We don't care about unlinked files since they were handled in a 
+            // previous step
+            c.path === filePath && c.type !== 'unlink'
+        ))
+
+        if (!options.initial) {
+            debug('relevant changes for %o are %o', cssFile, relevantChanges)
+        }
+
+        // Skip this file if this is not the initial build and there were no
+        // relevant changes
+        if (!options.initial && !relevantChanges.length) {
+            debug('skipping %o', cssFile)
+
+            continue
+        }
+
+        const processed = await processor.process(await fse.readFile(filePath), {
             // For source-maps, in case we ever start generating them
-            from: cssFile
+            from: filePath
         })
 
-        await fse.writeFile(cssFile, processed.css)
+        await fse.writeFile(filePath, processed.css)
     }
 }
 
-const build = async (from: string, to: string) => {
+const build = async (from: string, to: string, options: BuildOptions = {
+    initial: true, changes: []
+}) => {
+    if (process.env.NODE_ENV === 'development') {
+        createDebugLogger.enable('dhow:build')
+    }
+
     const fromPath = path.resolve(from)
     const toPath = path.resolve(to)
 
@@ -222,18 +102,26 @@ const build = async (from: string, to: string) => {
         throw new Error('The input and output directories must not be the same.')
     }
 
-    // Ensure `toPath` points to an empty directory
-    await fse.remove(toPath);
-    await fse.ensureDir(toPath);
+    if (options.initial) {
+        // Ensure `toPath` points to an empty directory
+        await fse.remove(toPath);
+        await fse.ensureDir(toPath);
+
+        debug('performing initial build, cleaned %o', toPath)
+    } else {
+        debug('performing incremental build based on %o', options.changes)
+    }
 
     // Build pages from `from` to `to`
-    buildPages(fromPath, toPath)
+    await buildPages(fromPath, toPath, options)
+    debug('built pages')
 
-    // Copy public folder contents to `to`
-    await fse.copy('./public/', toPath)
+    await copyPublic(toPath, options)
+    debug('copied public directory')
 
     // Process CSS inside `to`
-    await processCSS(toPath)
+    await processCSS(toPath, options)
+    debug('processed css')
 }
 
 export default build

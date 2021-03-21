@@ -39,7 +39,7 @@ export const watch = (
     })
 
     watcher.on('all', callback)
-    watcher.on('ready', callback)
+    watcher.on('ready', (path: string) => callback('ready', path))
 }
 
 export const serve = async (directory: string, port: number) => {

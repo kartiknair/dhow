@@ -43,14 +43,24 @@ const buildDevelopment: DevelopmentBuild = async ({
         return
     }
 
-    watch('.', async () => {
-        logger.wait('building...')
+    watch('.', async (changeType: string, changePath: string) => {
+        const allowedTypes = [ 'ready', 'add', 'change', 'unlink' ]
+        if (!allowedTypes.includes(changeType)) {
+            return
+        }
+
+        logger.wait('building')
 
         try {
-            await build(input, output)
+            await build(input, output, {
+                initial: changeType === 'ready',
+                changes: changeType === 'ready' ? [] : [{
+                    type: changeType, path: path.resolve(changePath)
+                }],
+            })
 
             logger.done('built changes')
-        } catch (err) {
+        } catch (err) {            
             logger.error(`failed building`, err)
         }
     }, { ignore: [ 'node_modules', path.normalize(output) ] })
