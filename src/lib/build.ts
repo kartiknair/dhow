@@ -91,10 +91,6 @@ const processCSS = async (directory: string, options: BuildOptions) => {
 const build = async (from: string, to: string, options: BuildOptions = {
     initial: true, changes: []
 }) => {
-    if (process.env.NODE_ENV === 'development') {
-        createDebugLogger.enable('dhow:build')
-    }
-
     const fromPath = path.resolve(from)
     const toPath = path.resolve(to)
 

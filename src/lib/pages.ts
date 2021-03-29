@@ -161,8 +161,6 @@ const pagesCache: { [path: string]: {
 export const buildPages = async (
     fromPath: string, toPath: string, options: BuildOptions
 ) => {
-    debug(pagesCache)
-
     // Handle deletions of pages
     for (const change of options.changes) {
         if (change.type !== 'unlink' || !change.path.startsWith(fromPath)) {
