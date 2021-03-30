@@ -14,20 +14,20 @@ export type BuildOptions = {
     changes: { type: string, path: string }[],
 }
 
-const copyPublic = async (toPath: string, options: BuildOptions) => {
-    const origin = path.join(process.cwd(), 'public')
+const publicPath = path.join(process.cwd(), 'public')
 
+const copyPublic = async (toPath: string, options: BuildOptions) => {
     if (options.initial) {
-        return await fse.copy(origin, toPath)
+        return await fse.copy(publicPath, toPath)
     }
 
     // Assume that content was already copied over so only do what's necessary
     for (const change of options.changes) {
-        if (!change.path.startsWith(origin)) {
+        if (!change.path.startsWith(publicPath)) {
             continue
         }
 
-        const destination = path.join(change.path.slice(origin.length))
+        const destination = path.join(toPath, change.path.slice(publicPath.length))
 
         if (change.type === 'unlink') {
             debug('deleting %o as part of change %o', destination, change)
@@ -36,8 +36,8 @@ const copyPublic = async (toPath: string, options: BuildOptions) => {
         }
 
         if (change.type === 'change' || change.type === 'add') {
-            debug('copying %o to %o as part of change of type %o', destination,
-                change.path, change.type)
+            debug('copying %o to %o as part of change of type %o', change.path,
+                destination, change.type)
 
             await fse.copy(change.path, destination)
         }
@@ -62,9 +62,8 @@ const processCSS = async (directory: string, options: BuildOptions) => {
         const filePath = path.resolve(cssFile)
 
         const relevantChanges = options.changes.filter((c) => (
-            // We don't care about unlinked files since they were handled in a 
-            // previous step
-            c.path === filePath && c.type !== 'unlink'
+            c.path.slice(publicPath.length) === filePath.slice(directory.length)
+                && c.type !== 'unlink'
         ))
 
         if (!options.initial) {
