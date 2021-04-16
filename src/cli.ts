@@ -24,11 +24,14 @@ const buildProduction: ProductionBuild = async ({
     }
 }
 
-type DevelopmentBuild =
-    ({}: { indir: string, outdir: string, port: string }) => Promise<void>
+type DevelopmentBuild = (
+    {}: {
+        indir: string, outdir: string, port: string, 'disable-cache': boolean,
+    }
+) => Promise<void>
 
 const buildDevelopment: DevelopmentBuild = async ({
-    indir: input, outdir: output, port,
+    indir: input, outdir: output, port, 'disable-cache': disableCache
 }) => {
     process.env.NODE_ENV = 'development'
 
@@ -52,9 +55,12 @@ const buildDevelopment: DevelopmentBuild = async ({
         logger.wait('building')
 
         try {
+            // Pretend that it's the first build if caching is disabled
+            const initial = changeType === 'ready' || disableCache
+
             await build(input, output, {
-                initial: changeType === 'ready',
-                changes: changeType === 'ready' ? [] : [{
+                initial,
+                changes: initial ? [] : [{
                     type: changeType, path: path.resolve(changePath)
                 }],
             })
@@ -98,6 +104,10 @@ dhow.command('dev')
         'Sets the port where your files will be served on, this may be overridden '
             + 'with the environment variable PORT',
         '3000',
+    )
+    .option(
+        '--disable-cache',
+        'Disables caching of built files.',
     )
     .example('dev -p 3001')
     .example('dev -i src/pages -o build')
