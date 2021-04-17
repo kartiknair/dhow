@@ -51,9 +51,7 @@ type Page = {
 const readPage = (filePath: string) => {
     // Ensure that code is always re-run since it might have changed since the 
     // last time this was called
-    if (require.cache[filePath]) {
-        delete require.cache[filePath]
-    }
+    delete require.cache[require.resolve(filePath)]
 
     try {
         const pageModule = require(filePath)
@@ -85,6 +83,8 @@ const readPage = (filePath: string) => {
 
 const readComponentLike = (filePath: string) => {
     try {
+        delete require.cache[require.resolve(filePath)];
+
         const componentModule = require(filePath)
         const component: Component = componentModule.default
 
@@ -223,16 +223,25 @@ export const buildPages = async (
 
         pagesCache[filePath].localDependencies =
             await getLocalDependencies(filePath)
+
+        debug('local dependencies of %o are %o', filePath.slice(fromPath.length),
+            pagesCache[filePath].localDependencies)
     }
 
     debug('transpiling js files to %o', stagingPath)
 
-    await Promise.all(
+    const jsBuildResults = await Promise.all(
         jsFilePaths.map((filePath) => buildJsFile(
             filePath,
             path.join(stagingPath, filePath.slice(fromPath.length)),
         ))
     )
+
+    for (const result of jsBuildResults) {
+        for (const warning of result.warnings) {
+            debug('%o', warning)
+        }
+    }
 
     // Set up the document (VNode tree) into which built html will be inserted
     const document = getDocument(stagingPath)
@@ -259,7 +268,7 @@ export const buildPages = async (
     for (const pagePath of pagePaths) {
         const parsedPagePath = path.parse(pagePath)
 
-        if ([ '_app.js', '_document.js' ].includes(parsedPagePath.name)) {
+        if ([ '_app', '_document' ].includes(parsedPagePath.name)) {
             continue
         }
 
