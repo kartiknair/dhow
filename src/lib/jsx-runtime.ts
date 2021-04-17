@@ -5,6 +5,18 @@ export const Fragment = Symbol('fragment')
 type Attributes = { [key: string]: any }
 export type Props = Attributes
 
+export const createElement = (
+    type: VNode['type'] | Component,
+    props: Props = {},
+    ...children: VNode['children']
+): VNode => {
+    if (typeof type === 'function') {
+        return type({ children, ...props })
+    }
+
+    return new VNode(type, props, children)
+}
+
 export class VNode {
     static styleToString(style: CSSStyleDeclaration) {
         const cssifyKey = (key: string) =>
@@ -22,15 +34,26 @@ export class VNode {
     constructor(
         type: keyof HTMLElementTagNameMap | typeof Fragment,
         attributes: Attributes,
-        children: (VNode | string)[],
+        // The VNode[] case happens with the special children prop
+        children: (VNode[] | VNode | string)[],
     ) {
         this.type = type
-        this.children = children || []
+        this.children = []
         this.attributes = attributes || {}
+
+        for (const child of children) {
+            if (Array.isArray(child)) {
+                this.children.push(createElement(Fragment, undefined, ...child))
+            } else {
+                this.children.push(child)
+            }
+        }
     }
 
     toString(): string {
-        let contentString = this.children.map((c) => c.toString()).join('')
+        let contentString = this.children.map((c) => (
+            Array.isArray(c) ? c.map((c) => c.toString).join('') : c.toString()
+        )).join('')
 
         if (this.type === Fragment) {
             return contentString
@@ -69,7 +92,7 @@ export class VNode {
         }
 
         for (const child of this.children) {
-            if (typeof child === 'string') {
+            if (typeof child === 'string' || Array.isArray(child)) {
                 continue
             }
 
@@ -84,15 +107,3 @@ export class VNode {
 }
 
 export type Component = ((props?: Props) => VNode)
-
-export const createElement = (
-    type: VNode['type'] | Component,
-    props: Props = {},
-    ...children: VNode['children']
-): VNode => {
-    if (typeof type === 'function') {
-        return type({ children, ...props })
-    }
-
-    return new VNode(type, props, children)
-}
