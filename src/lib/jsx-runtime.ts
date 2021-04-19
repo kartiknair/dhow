@@ -52,7 +52,7 @@ export class VNode {
 
     toString(): string {
         let contentString = this.children.map((c) => (
-            Array.isArray(c) ? c.map((c) => c.toString).join('') : c.toString()
+            Array.isArray(c) ? c.map((c) => c.toString()).join('') : c?.toString()
         )).join('')
 
         if (this.type === Fragment) {
