@@ -8,6 +8,10 @@ import { debug, BuildOptions } from './build'
 import { head } from './head'
 import { createElement, Component, Props } from './jsx-runtime'
 
+// This file modifies process.env with keys of the format `__DHOW_${NAME}`
+// since pages may need certain information in special cases. (Pages are 
+// built/executed in the same scope as the code in this file.)
+
 const DefaultDocument = (
     createElement('html', { lang: 'en' },
         createElement('head', {},
@@ -194,6 +198,8 @@ export const buildPages = async (
     const stagingPath = path.join(toPath, '.staging')
     await fse.ensureDir(stagingPath)
 
+    process.env.__DHOW_STAGING_PATH = stagingPath
+
     // Build all .js files (pages) to staging (JSX -> regular JS)
     const jsFilePaths = options.initial ? (
         await glob(path.join(fromPath, '**/*.js'))
@@ -268,6 +274,9 @@ export const buildPages = async (
     for (const pagePath of pagePaths) {
         const parsedPagePath = path.parse(pagePath)
 
+        process.env.__DHOW_PAGE_PATH = pagePath
+        process.env.__DHOW_PAGE_DIR = parsedPagePath.dir
+
         if ([ '_app', '_document' ].includes(parsedPagePath.name)) {
             continue
         }
@@ -291,6 +300,8 @@ export const buildPages = async (
         }
 
         for (const routePath of routePaths) {
+            process.env.__DHOW_ROUTE_PATH = routePath
+
             // Strip the previously prepended pageDir from the routePath since 
             // getProps expects the values that were returned from getPaths
             const props = await page.getProps(routePath.slice(pageDir.length))
