@@ -1,7 +1,7 @@
 import { test } from 'uvu'
 import assert from 'uvu/assert'
 
-import { createElement, Fragment, VNode, Component } from '../src/jsx-runtime'
+import { createElement, Fragment, VNode, Component } from '../src/lib/jsx-runtime'
 
 test('build a single node from a single jsx element', () => {
     assert.equal((
