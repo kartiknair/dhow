@@ -19,6 +19,7 @@ export const createElement = (
 
 export class VNode {
     static styleToString(style: CSSStyleDeclaration) {
+        // TODO: This is probably slower than alternatives
         const cssifyKey = (key: string) =>
             key.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
 
