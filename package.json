@@ -10,7 +10,8 @@
         "build": "tsc",
         "postbuild": "copyfiles -u 1 src/**/*.js dist",
         "dev": "onchange \"src/**/*\" -- npm run build",
-        "test": "uvu -r ts-node/register test"
+        "test": "uvu -r ts-node/register test",
+        "prepare": "npm run build"
     },
     "keywords": [],
     "author": "",
