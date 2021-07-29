@@ -1,2 +1,2 @@
-import * as Dhow from 'dhow'
+import * as Dhow from '@fsoc/dhow'
 export { Dhow }
