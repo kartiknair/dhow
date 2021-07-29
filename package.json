@@ -1,6 +1,6 @@
 {
-    "name": "dhow",
-    "version": "3.0.4",
+    "name": "@fsoc/dhow",
+    "version": "1.0.0",
     "description": "JSX-powered SSG for Node.js",
     "main": "dist/dhow.js",
     "bin": {
@@ -41,15 +41,14 @@
         "uvu": "^0.5.1"
     },
     "directories": {
-        "example": "examples",
         "test": "test"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kartiknair/dhow.git"
+        "url": "git+https://github.com/fsoc/dhow.git"
     },
     "bugs": {
-        "url": "https://github.com/kartiknair/dhow/issues"
+        "url": "https://github.com/fsoc/dhow/issues"
     },
-    "homepage": "https://github.com/kartiknair/dhow#readme"
+    "homepage": "https://github.com/fsoc/dhow#readme"
 }

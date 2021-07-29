@@ -1,4 +1,6 @@
 examples
 test
 website
+src
 .prettierrc.json
+tsconfig.json
