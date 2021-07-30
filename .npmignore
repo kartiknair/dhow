@@ -1,6 +1,6 @@
-examples
-test
-website
-src
-.prettierrc.json
-tsconfig.json
+# Blacklist everything (stuff like README and package.json can't be blacklisted
+# so this is fine) 
+*
+
+# Whitelist only the dist folder
+!dist/**/*
