@@ -18,7 +18,18 @@ const publicPath = path.join(process.cwd(), 'public')
 
 const copyPublic = async (toPath: string, options: BuildOptions) => {
     if (options.initial) {
-        return await fse.copy(publicPath, toPath)
+        try {
+            return await fse.copy(publicPath, toPath)
+        } catch (err) {
+            // Silently ignore cases where the public dir doesn't exist
+            if (err.code !== 'ENOENT') {
+                debug('ignoring missing public directory')
+
+                throw err
+            }
+
+            return
+        }
     }
 
     // Assume that content was already copied over so only do what's necessary
