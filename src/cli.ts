@@ -13,7 +13,7 @@ const buildProduction: ProductionBuild = async ({
 }) => {
     process.env.NODE_ENV = 'production'
 
-    logger.wait('building...')
+    logger.wait('building')
 
     try {
         await build(input, output)
@@ -55,7 +55,7 @@ const buildDevelopment: DevelopmentBuild = async ({
         logger.wait('building')
 
         try {
-            // Pretend that it's the first build if caching is disabled
+            // Pretend that it's always the first build if caching is disabled
             const initial = changeType === 'ready' || disableCache
 
             await build(input, output, {
