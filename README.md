@@ -65,7 +65,7 @@ const Home = () => (<>
 export default Home
 ```
 
-## Built time data fetching
+## Build time data fetching
 
 In addition to the required default export, pages can export the (optionally async) function `getProps`, which can be used to dynamicaly fetch content at build time. Its return value is passed to the default-exported function.
 
@@ -87,7 +87,7 @@ export const getProps = async () => ({
 
 By default each page is mapped to a route, determined by its file path. One can map a single page to multiple routes by wrapping its file name in brackets, like `pages/post/[pid].js`.
 
-In order to define the possible routes, a page can export the (optionally async) function `getPaths`, which is expected to return an array of strings. The file name is thus ignored and replaced with each item in the returned array.
+In order to define the possible routes, a page can export the (optionally async) function `getPaths`, which is expected to return an array of strings. The file name is ignored and can be thought to be replaced with each item in the array.
 
 ```js
 export default ({ content }) => (<>
@@ -109,13 +109,13 @@ export const getProps = async (slug) => ({
 export const getPaths = async () => Object.keys(data)
 ```
 
-As can be seen in the example above, each item in the returned array is also passed to `getProps` (if it was exported).
+As can be seen in the example above, each item in the returned array is also passed to `getProps` (if it was exported). Assuming the above code is in the pages root, this would result in the routes `/about`, `/contact` and `/privacy` being available.
 
 ## Custom `App` and `Document`
 
 Analogous to NextJS, one can override the default `App` or `Document` through providing an `_app.js` or `_document.js` in the pages directory.
 
-The `App` is a wrapper around every page, it receives the component that is default exported from every page and the result of the `getProps` function (`undefined` if it was not exported).
+The `App` is a wrapper around every page, it receives the component that is exported from every page and the result of the `getProps` function (`undefined` if it was not exported).
 
 ```js
 const App = ({ Component, pageProps = {} }) => (<>
@@ -144,7 +144,7 @@ const Document = () => (<>
 export default Document;
 ```
 
-Note that, if provided, this is a complete replacement of the internal default tree (which looks like the above).
+Note that, if provided, this is a complete replacement of the internal default tree (which looks like the above), so make sure it is complete.
 
 ## Modifying the `head` content
 
