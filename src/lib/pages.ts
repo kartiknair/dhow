@@ -288,7 +288,7 @@ export const buildPages = async (
         // Compute all routes (all folders where a .html file will eventually 
         // be generated to
         const routePaths = page.getPaths ? (
-            (await page.getPaths()).map((p) => path.join(pageDir, p))
+            (await page.getPaths()).map((p) => pageDir + path.sep + p)
         ) : (
             [ parsedPagePath.name === 'index' ? pageDir : parsedPagePath.name ]
         )
@@ -304,7 +304,8 @@ export const buildPages = async (
 
             // Strip the previously prepended pageDir from the routePath since 
             // getProps expects the values that were returned from getPaths
-            const props = await page.getProps(routePath.slice(pageDir.length))
+            const props = await page.getProps(routePath.slice((
+                pageDir + path.sep).length))
             const html = createElement(Wrapper, {
                 Component: page.default, pageProps: props
             }).toString()
