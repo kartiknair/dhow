@@ -41,7 +41,7 @@ const buildJsFile = async (fromFile: string, toFile: string) => {
         jsxFactory: 'Dhow.createElement',
         jsxFragment: 'Dhow.Fragment',
         // ...and inject the relevant import into every file
-        external: [ 'dhow' ],
+        external: [ '@fsoc/dhow' ],
         inject: [ path.join(__dirname, '/import-shim.js') ],
     })
 }
@@ -202,7 +202,7 @@ export const buildPages = async (
 
     // Build all .js files (pages) to staging (JSX -> regular JS)
     const jsFilePaths = options.initial ? (
-        await glob(path.join(fromPath, '**/*.js'))
+        await glob(path.join(fromPath, '**/*.js').replace(/\\/g, '/'))
     ) : (
         options.changes
             .filter((c) => c.type !== 'unlink' && c.path.startsWith(fromPath))
@@ -267,7 +267,7 @@ export const buildPages = async (
     const Wrapper = getWrapper(stagingPath)
 
     // Get the paths to all pages (all .js files in staging)
-    const pagePaths = await glob(path.join(stagingPath, '**/*.js'))
+    const pagePaths = await glob(path.join(stagingPath, '**/*.js').replace(/\\/g, '/'))
 
     debug('building pages at the paths %o', pagePaths)
 

@@ -67,7 +67,7 @@ const processCSS = async (directory: string, options: BuildOptions) => {
     }
 
     const processor = postcss(plugins)
-    const cssFiles = (await glob(path.join(directory, '**/*.css')))
+    const cssFiles = (await glob(path.join(directory, '**/*.css').replace(/\\/g, '/')))
 
     for (const cssFile of cssFiles) {
         const filePath = path.resolve(cssFile)
