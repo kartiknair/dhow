@@ -285,10 +285,13 @@ export const buildPages = async (
 
         const page = readPage(pagePath)
 
+        // Make sure to save the paths as they were provided to be able to pass
+        // them to the component as-is
+        const origPagePaths = page.getPaths ? await page.getPaths() : []
         // Compute all routes (all folders where a .html file will eventually 
         // be generated to
-        const routePaths = page.getPaths ? (
-            (await page.getPaths()).map((p) => pageDir + path.sep + p)
+        const routePaths = origPagePaths.length ? (
+            origPagePaths.map((p) => pageDir + path.sep + p)
         ) : (
             [ parsedPagePath.name === 'index' ? pageDir : parsedPagePath.name ]
         )
@@ -299,13 +302,14 @@ export const buildPages = async (
             pagesCache[cacheKey] = { routePaths: [], localDependencies: [] }
         }
 
-        for (const routePath of routePaths) {
+        for (let i = 0; i < routePaths.length; i++) {
+            const routePath = process.platform === 'win32'
+                ? routePaths[i].replace('\\', '/')
+                : routePaths[i]
+
             process.env.__DHOW_ROUTE_PATH = routePath
 
-            // Strip the previously prepended pageDir from the routePath since 
-            // getProps expects the values that were returned from getPaths
-            const props = await page.getProps(routePath.slice((
-                pageDir + path.sep).length))
+            const props = await page.getProps(origPagePaths[i] || routePath)
             const html = createElement(Wrapper, {
                 Component: page.default, pageProps: props
             }).toString()
