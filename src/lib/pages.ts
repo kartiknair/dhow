@@ -323,7 +323,7 @@ export const buildPages = async (
             }
 
             const htmlPath = path.join(toPath, routePath, 'index.html')
-            await fse.outputFile(htmlPath, document.toString())
+            await fse.outputFile(htmlPath, `<!DOCTYPE html>\n${document.toString()}`)
 
             if (!pagesCache[cacheKey].routePaths.includes(htmlPath)) {
                 pagesCache[cacheKey].routePaths.push(htmlPath)
