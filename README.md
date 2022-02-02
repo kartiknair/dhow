@@ -1,10 +1,10 @@
-This is a rewrite of [kartiknair/dhow](https://github.com/kartiknair/dhow), written because I ran into some issues that were hard to debug and was missing some features.
+This is a fork of [kartiknair/dhow](https://github.com/kartiknair/dhow) with some additional features.
 
 From the original `README`:
 
 >JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
 
-I tried to keep this brief since it's mostly for my own convenience and because I hope to get the code changes merged into upstream at some point.
+The changes in this fork are made in the hope that the modifications will eventually be included in the upstream repository.
 
 ## Getting Started
 
