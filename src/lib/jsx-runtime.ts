@@ -71,10 +71,13 @@ export class VNode {
             this.attributes.style =  VNode.styleToString(this.attributes.style)
         }
 
-        if (this.attributes.html) {
-            contentString = this.attributes.html
+        const customHtml = this.attributes.html
+            || this.attributes.dangerouslySetInnerHTML
+        if (customHtml) {
+            contentString = customHtml
 
             delete this.attributes.html
+            delete this.attributes.dangerouslySetInnerHTML
         }
 
         const attributesString = Object.entries(this.attributes)

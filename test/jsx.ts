@@ -49,6 +49,14 @@ test('build html from a single jsx element', () => {
     ).toString(), (
         '<p><strong>Paragraph</strong></p>'
     ))
+
+    assert.equal((
+        createElement('p', { dangerouslySetInnerHTML: '<strong>Paragraph</strong>' },
+            'Some content that should get ignored in favor of the `html` prop'
+        )
+    ).toString(), (
+        '<p><strong>Paragraph</strong></p>'
+    ))
 })
 
 test('build an html element with styles from a jsx element', () => {
