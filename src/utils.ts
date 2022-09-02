@@ -15,8 +15,9 @@ const createLogger = (name: string, color: chalk.ChalkFunction) => {
 const createErrorLogger = (name: string) => {
     const prefix = chalk.red(name) + ' - '
 
-    return (message: string, err: Error) => console.error(
-        prefix + message + '\n' + chalk.gray(err.stack)
+    return (message: string, err: any) => (
+        console.error(prefix + message + '\n'
+            + chalk.gray(err instanceof Error ? err.stack : err))
     )
 }
 

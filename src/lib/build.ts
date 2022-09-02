@@ -20,15 +20,15 @@ const copyPublic = async (toPath: string, options: BuildOptions) => {
     if (options.initial) {
         try {
             return await fse.copy(publicPath, toPath)
-        } catch (err) {
+        } catch (err: any) {
             // Silently ignore cases where the public dir doesn't exist
             if (err.code !== 'ENOENT') {
                 debug('ignoring missing public directory')
 
+                return
+            } else {
                 throw err
             }
-
-            return
         }
     }
 
@@ -60,7 +60,7 @@ const processCSS = async (directory: string, options: BuildOptions) => {
 
     try {
         plugins = require(path.resolve('postcss.config.js')).plugins
-    } catch (err) {
+    } catch (err: any) {
         if (err.code !== 'MODULE_NOT_FOUND') {
             throw err
         }

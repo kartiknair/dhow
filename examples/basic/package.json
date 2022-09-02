@@ -10,8 +10,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@fsoc/dhow": "^1.0.3"
-  }
+  "license": "ISC"
 }

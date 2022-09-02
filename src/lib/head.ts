@@ -10,6 +10,10 @@ export const head = {
     set contents(contents: VNode[]) {
         this._contents = contents
     },
+
+    reset() {
+        this._contents = []
+    }
 }
 
 export const Head = ({ children }: { children: VNode[] }) => {

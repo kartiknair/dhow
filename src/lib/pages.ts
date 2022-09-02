@@ -80,7 +80,7 @@ const readPage = (filePath: string) => {
         page.getProps = page.getProps || (() => {})
 
         return page
-    } catch (err) {
+    } catch (err: any) {
         throw new Error(`Malformed page (${filePath}): ${err.message}`)
     }
 }
@@ -97,7 +97,7 @@ const readComponentLike = (filePath: string) => {
         }
 
         return component
-    } catch (err) {
+    } catch (err: any) {
         if (err.code === 'MODULE_NOT_FOUND') {
             return null
         }
@@ -319,7 +319,7 @@ export const buildPages = async (
             if (head.contents) {
                 documentHead.children.push(...head.contents)
 
-                head.contents = []
+                head.reset()
             }
 
             const htmlPath = path.join(toPath, routePath, 'index.html')
