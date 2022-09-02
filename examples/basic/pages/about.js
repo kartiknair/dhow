@@ -1,4 +1,10 @@
+import { Head } from '@fsoc/dhow';
+
 const About = () => (<>
+    <Head>
+        <title>Another Example Title</title>
+    </Head>
+
     <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc volutpat ornare condimentum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Cras sollicitudin.
     </p>

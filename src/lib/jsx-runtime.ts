@@ -28,6 +28,10 @@ export class VNode {
         )).join(' ')
     }
 
+    static clone(instance: VNode): VNode {
+        return new VNode(instance.type, instance.attributes, instance.children);
+    }
+
     type
     children: (VNode | string)[]
     attributes: Attributes

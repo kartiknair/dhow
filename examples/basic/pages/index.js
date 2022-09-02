@@ -1,4 +1,10 @@
+import { Head } from '@fsoc/dhow';
+
 const Home = () => (<>
+    <Head>
+        <title>Example Title</title>
+    </Head>
+
     <img src={'/dhow.jpg'} alt={'Dhow'} />
 
     <p>

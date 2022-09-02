@@ -6,7 +6,7 @@ import * as esbuild from 'esbuild'
 import { debug, BuildOptions } from './build'
 
 import { head } from './head'
-import { createElement, Component, Props } from './jsx-runtime'
+import { createElement, Component, Props, VNode } from './jsx-runtime'
 
 // This file modifies process.env with keys of the format `__DHOW_${NAME}`
 // since pages may need certain information in special cases. (Pages are 
@@ -87,7 +87,7 @@ const readPage = (filePath: string) => {
 
 const readComponentLike = (filePath: string) => {
     try {
-        delete require.cache[require.resolve(filePath)];
+        delete require.cache[require.resolve(filePath)]
 
         const componentModule = require(filePath)
         const component: Component = componentModule.default
@@ -156,6 +156,15 @@ const getLocalDependencies = async (filePath: string) => {
 
     return dependencies
 }
+
+const getDocumentEntry = (document: VNode) => (
+    document.find({ id: 'dhow' })
+        || document.find({ type: 'body' })
+)
+
+const getDocumentHead = (document: VNode) => (
+    document.find({ type: 'head' })
+)
 
 const pagesCache: { [path: string]: {
     routePaths: string[],
@@ -250,18 +259,7 @@ export const buildPages = async (
     }
 
     // Set up the document (VNode tree) into which built html will be inserted
-    const document = getDocument(stagingPath)
-    const documentEntry = document.find({ id: 'dhow' })
-        || document.find({ type: 'body' })
-    const documentHead = document.find({ type: 'head' })
-
-    if (!documentEntry) {
-        throw new Error('Invalid document, no entry point found.')
-    }
-
-    if (!documentHead) {
-        throw new Error('Invalid document, no head found.')
-    }
+    const originalDocument = getDocument(stagingPath)
 
     // Get the component which will wrap all pages 
     const Wrapper = getWrapper(stagingPath)
@@ -272,6 +270,15 @@ export const buildPages = async (
     debug('building pages at the paths %o', pagePaths)
 
     for (const pagePath of pagePaths) {
+        const document = VNode.clone(originalDocument)
+
+        const documentHead = getDocumentHead(document)
+        const documentEntry = getDocumentEntry(document)
+
+        if (!documentHead || !documentEntry) {
+            throw new Error('Malformed document, head or entry point not found')
+        }
+
         const parsedPagePath = path.parse(pagePath)
 
         process.env.__DHOW_PAGE_PATH = pagePath
