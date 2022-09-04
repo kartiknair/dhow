@@ -210,6 +210,7 @@ export const buildPages = async (
     process.env.__DHOW_STAGING_PATH = stagingPath
 
     // Build all .js files (pages) to staging (JSX -> regular JS)
+
     const jsFilePaths = options.initial ? (
         await glob(path.join(fromPath, '**/*.js').replace(/\\/g, '/'))
     ) : (
@@ -270,6 +271,11 @@ export const buildPages = async (
     debug('building pages at the paths %o', pagePaths)
 
     for (const pagePath of pagePaths) {
+        // This is a pretty expensive operation, done to prevent changes that 
+        // are made in the document to propagate to other pages
+        // The only case where this was discovered to happen was when adding 
+        // the head, it would probably be possible to handle that specific case 
+        // without cloning
         const document = VNode.clone(originalDocument)
 
         const documentHead = getDocumentHead(document)

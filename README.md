@@ -139,9 +139,9 @@ const Document = () => (<>
             {/* Pages will get inserted here. */}
         </body>
     </html>
-</>);
+</>)
 
-export default Document;
+export default Document
 ```
 
 Note that, if provided, this is a complete replacement of the internal default tree (which looks like the above), so make sure it is complete.

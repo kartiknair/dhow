@@ -1,4 +1,4 @@
-import { Head } from '@fsoc/dhow';
+import { Head } from '@fsoc/dhow'
 
 const Home = () => (<>
     <Head>

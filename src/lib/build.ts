@@ -110,8 +110,8 @@ const build = async (from: string, to: string, options: BuildOptions = {
 
     if (options.initial) {
         // Ensure `toPath` points to an empty directory
-        await fse.remove(toPath);
-        await fse.ensureDir(toPath);
+        await fse.remove(toPath)
+        await fse.ensureDir(toPath)
 
         debug('performing initial build, cleaned %o', toPath)
     } else {
