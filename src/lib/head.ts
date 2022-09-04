@@ -1,10 +1,11 @@
 import { createElement, Fragment, VNode } from './jsx-runtime'
 
 export const head = {
+    static: <VNode[]>[],
     _contents: <VNode[]>[],
 
     get contents() {
-        return this._contents
+        return [ ...this.static, ...this._contents ]
     },
 
     set contents(contents: VNode[]) {

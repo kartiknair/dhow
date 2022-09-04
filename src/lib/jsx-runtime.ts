@@ -29,7 +29,18 @@ export class VNode {
     }
 
     static clone(instance: VNode): VNode {
-        return new VNode(instance.type, instance.attributes, instance.children);
+        // Recursively clone children
+        const children = instance.children.map((c) => {
+            if (Array.isArray(c)) {
+                return [ ...c.map((child) => VNode.clone(child)) ]
+            } else if (c instanceof VNode) {
+                return VNode.clone(c)
+            }
+
+            return c
+        });
+
+        return new VNode(instance.type, instance.attributes, children)
     }
 
     type

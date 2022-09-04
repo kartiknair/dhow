@@ -2,8 +2,11 @@
 
 import path from'path'
 import sade from 'sade'
+import { WebSocketServer } from 'ws'
 
 import build from './lib/build'
+import { head } from './lib/head'
+import { VNode } from './lib/jsx-runtime'
 import { logger, watch, serve } from './utils'
 
 type ProductionBuild = ({}: { indir: string, outdir: string }) => Promise<void>
@@ -46,6 +49,8 @@ const buildDevelopment: DevelopmentBuild = async ({
         return
     }
 
+    const wss = new WebSocketServer({ port: 29231 })
+
     watch('.', async (changeType: string, changePath: string) => {
         const allowedTypes = [ 'ready', 'add', 'change', 'unlink' ]
         if (!allowedTypes.includes(changeType)) {
@@ -53,6 +58,18 @@ const buildDevelopment: DevelopmentBuild = async ({
         }
 
         logger.wait('building')
+
+        head.static = [
+            new VNode('script', [], [`
+                const socket = new WebSocket('ws://localhost:29231')
+
+                socket.addEventListener('message', (event) => {
+                    if (event.data === 'reload') {
+                        window.location.reload();
+                    }
+                })
+            `])
+        ]
 
         try {
             // Pretend that it's always the first build if caching is disabled
@@ -68,6 +85,10 @@ const buildDevelopment: DevelopmentBuild = async ({
             logger.done('built changes')
         } catch (err) {            
             logger.error(`failed building`, err)
+        }
+
+        for (const client of wss.clients) {
+            client.send('reload')
         }
     }, { ignore: [ 'node_modules', path.normalize(output) ] })
 }
