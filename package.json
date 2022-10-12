@@ -1,6 +1,6 @@
 {
     "name": "@fsoc/dhow",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "description": "JSX-powered SSG for Node.js",
     "main": "dist/dhow.js",
     "bin": {
