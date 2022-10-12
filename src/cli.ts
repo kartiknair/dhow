@@ -65,7 +65,7 @@ const buildDevelopment: DevelopmentBuild = async ({
 
                 socket.addEventListener('message', (event) => {
                     if (event.data === 'reload') {
-                        window.location.reload();
+                        window.location.reload()
                     }
                 })
             `])

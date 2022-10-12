@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "dhow dev",
-    "build": "dhow build"
+    "dev": "dhow dev --disable-cache",
+    "build": "dhow build --disable-cache"
   },
   "keywords": [],
   "author": "",

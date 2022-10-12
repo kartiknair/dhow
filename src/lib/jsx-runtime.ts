@@ -32,7 +32,7 @@ export class VNode {
         // Recursively clone children
         const children = instance.children.map((c) => {
             if (Array.isArray(c)) {
-                return [ ...c.map((child) => VNode.clone(child)) ]
+                return c.map((child) => VNode.clone(child))
             } else if (c instanceof VNode) {
                 return VNode.clone(c)
             }

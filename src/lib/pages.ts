@@ -158,8 +158,7 @@ const getLocalDependencies = async (filePath: string) => {
 }
 
 const getDocumentEntry = (document: VNode) => (
-    document.find({ id: 'dhow' })
-        || document.find({ type: 'body' })
+    document.find({ id: 'dhow' }) || document.find({ type: 'body' })
 )
 
 const getDocumentHead = (document: VNode) => (
@@ -271,20 +270,6 @@ export const buildPages = async (
     debug('building pages at the paths %o', pagePaths)
 
     for (const pagePath of pagePaths) {
-        // This is a pretty expensive operation, done to prevent changes that 
-        // are made in the document to propagate to other pages
-        // The only case where this was discovered to happen was when adding 
-        // the head, it would probably be possible to handle that specific case 
-        // without cloning
-        const document = VNode.clone(originalDocument)
-
-        const documentHead = getDocumentHead(document)
-        const documentEntry = getDocumentEntry(document)
-
-        if (!documentHead || !documentEntry) {
-            throw new Error('Malformed document, head or entry point not found')
-        }
-
         const parsedPagePath = path.parse(pagePath)
 
         process.env.__DHOW_PAGE_PATH = pagePath
@@ -316,6 +301,17 @@ export const buildPages = async (
         }
 
         for (let i = 0; i < routePaths.length; i++) {
+            // Clone to prevent changes to the head to propagate to other pages/routes,
+            // it would probably be possible to handle this more efficiently
+            const document = VNode.clone(originalDocument)
+
+            const documentHead = getDocumentHead(document)
+            const documentEntry = getDocumentEntry(document)
+
+            if (!documentHead || !documentEntry) {
+                throw new Error('Malformed document, head or entry point not found')
+            }
+
             const routePath = process.platform === 'win32'
                 ? routePaths[i].replace('\\', '/')
                 : routePaths[i]

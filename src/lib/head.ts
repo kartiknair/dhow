@@ -9,7 +9,7 @@ export const head = {
     },
 
     set contents(contents: VNode[]) {
-        this._contents = contents
+        this._contents.push(...contents)
     },
 
     reset() {
