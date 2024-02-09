@@ -193,4 +193,14 @@ test('build html from a component', () => {
     ))
 })
 
+test('nested <a>s', () => {
+    const nestedAnchors = createElement('a', { href: 'first-a-href' }, 
+        createElement('a', { href: 'second-a-href' }, 'second a content'),
+        createElement('a', { href: 'third-a-href' }, 'third a content'),
+        createElement('a', { href: 'fourth-a-href' }, 'fourth a content'),
+    )
+
+    assert.throws(nestedAnchors.toString)
+})
+
 test.run()

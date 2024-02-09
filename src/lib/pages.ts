@@ -322,7 +322,7 @@ export const buildPages = async (
             const html = createElement(Wrapper, {
                 Component: page.default, pageProps: props
             }).toString()
-
+            
             documentEntry.children = [ html ]
 
             if (head.contents) {

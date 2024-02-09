@@ -44,8 +44,8 @@ export class VNode {
     }
 
     type
+    attributes
     children: (VNode | string)[]
-    attributes: Attributes
 
     constructor(
         type: keyof HTMLElementTagNameMap | typeof Fragment,
@@ -67,6 +67,10 @@ export class VNode {
     }
 
     toString(): string {
+        if (this.type === 'a' && this.find({ type: 'a', includeSelf: false })) {
+            throw new Error('nested anchor tags are not allowed')
+        }
+
         let contentString = this.children.map((c) => (
             Array.isArray(c) ? c.map((c) => c.toString()).join('') : c?.toString()
         )).join('')
@@ -96,17 +100,20 @@ export class VNode {
         }
 
         const attributesString = Object.entries(this.attributes)
-            .map(([ key, value ]) => ` ${key}="${value}"`).join(' ')
-        
-        return `<${this.type}${attributesString}>${contentString}</${this.type}>`
+            .map(([ key, value ]) => `${key}="${value}"`).join(' ')
+        if (attributesString.length) {
+            return `<${this.type} ${attributesString}>${contentString}</${this.type}>`
+        } else {
+            return `<${this.type}>${contentString}</${this.type}>`
+        }
     }
 
-    find({ id = '', type }: { id?: string, type?: VNode['type'] }): VNode | null {
-        if (this.attributes.id === id) {
+    find({ id = '', type, includeSelf = true }: { id?: string, type?: VNode['type'], includeSelf?: boolean }): VNode | null {
+        if (includeSelf && this.attributes.id === id) {
             return this
         }
 
-        if (this.type === type) {
+        if (includeSelf && this.type === type) {
             return this
         }
 
@@ -115,7 +122,7 @@ export class VNode {
                 continue
             }
 
-            const found = child.find({ id, type })
+            const found = child.find({ id, type, includeSelf: true })
             if (found) {
                 return found
             }

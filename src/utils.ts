@@ -36,7 +36,7 @@ export const watch = (
     const watcher = chokidar.watch(watchPath, {
         ignoreInitial: true,
         ignored: (path: string) =>
-            options.ignore.filter((i) => path.startsWith(i)).length,
+            options.ignore.filter((i) => path.startsWith(i)).length !== 0,
     })
 
     watcher.on('all', callback)
