@@ -20,7 +20,7 @@
         "chalk": "^4.1.2",
         "chokidar": "^3.4.2",
         "debug": "^4.3.1",
-        "esbuild": "^0.8.46",
+        "esbuild": "^0.20.0",
         "fast-glob": "^3.2.4",
         "fs-extra": "^9.0.1",
         "polka": "^0.5.2",

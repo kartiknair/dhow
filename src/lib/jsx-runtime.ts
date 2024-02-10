@@ -118,7 +118,7 @@ export class VNode {
         }
 
         for (const child of this.children) {
-            if (typeof child === 'string' || Array.isArray(child)) {
+            if (!child || typeof child === 'string' || Array.isArray(child)) {
                 continue
             }
 

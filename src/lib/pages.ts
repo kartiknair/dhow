@@ -25,7 +25,7 @@ const DefaultWrapper = (props: Props = {}) => (
     createElement(props.Component, props.pageProps)
 )
 
-const buildJsFile = async (fromFile: string, toFile: string) => {
+const buildSourceFile = async (fromFile: string, toFile: string) => {
     return esbuild.build({
         entryPoints: [ fromFile ],
         outfile: toFile,
@@ -37,7 +37,7 @@ const buildJsFile = async (fromFile: string, toFile: string) => {
         bundle: true,
 
         // Support JSX
-        loader: { '.js': 'jsx' },
+        loader: { '.js': 'jsx', '.ts': 'tsx' },
         jsxFactory: 'Dhow.createElement',
         jsxFragment: 'Dhow.Fragment',
         // ...and inject the relevant import into every file
@@ -208,27 +208,27 @@ export const buildPages = async (
 
     process.env.__DHOW_STAGING_PATH = stagingPath
 
-    // Build all .js files (pages) to staging (JSX -> regular JS)
+    // Build all source files (pages) to staging (transform jsx/tsx to js)
 
-    const jsFilePaths = options.initial ? (
-        await glob(path.join(fromPath, '**/*.js').replace(/\\/g, '/'))
+    const sourceFilePaths = options.initial ? (
+        await glob(path.join(fromPath, '**/*.{js,ts,jsx,tsx}').replace(/\\/g, '/'))
     ) : (
         options.changes
             .filter((c) => c.type !== 'unlink' && c.path.startsWith(fromPath))
             .map((change) => change.path)
     )
 
-    if (!jsFilePaths.length) {
+    if (!sourceFilePaths.length) {
         debug('skipping page building since there are no new files to build')
 
         return
     } else {
-        debug('building js files %o', jsFilePaths)
+        debug('building page source files %o', sourceFilePaths)
     }
 
     debug('getting local dependencies of js files')
 
-    for (const filePath of jsFilePaths) {
+    for (const filePath of sourceFilePaths) {
         if (!pagesCache[filePath]) {
             pagesCache[filePath] = {
                 routePaths: [], // This will be set later on
@@ -243,16 +243,18 @@ export const buildPages = async (
             pagesCache[filePath].localDependencies)
     }
 
-    debug('transpiling js files to %o', stagingPath)
+    debug('transpiling page source files to %o', stagingPath)
 
-    const jsBuildResults = await Promise.all(
-        jsFilePaths.map((filePath) => buildJsFile(
-            filePath,
-            path.join(stagingPath, filePath.slice(fromPath.length)),
-        ))
+    const buildResults = await Promise.all(
+        sourceFilePaths.map((filePath) => {
+            const stagingFilePathWithWrongExtension = path.join(stagingPath, filePath.slice(fromPath.length));
+            const stagingFilePath = stagingFilePathWithWrongExtension.slice(0, stagingFilePathWithWrongExtension.lastIndexOf('.')) + '.js';
+
+            return buildSourceFile(filePath, stagingFilePath);
+        })
     )
 
-    for (const result of jsBuildResults) {
+    for (const result of buildResults) {
         for (const warning of result.warnings) {
             debug('%o', warning)
         }
