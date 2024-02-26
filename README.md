@@ -1,300 +1,178 @@
-# Dhow
+This is a fork of [kartiknair/dhow](https://github.com/kartiknair/dhow) with some additional features.
 
-![npm version](https://img.shields.io/npm/v/dhow) ![License](https://img.shields.io/npm/l/dhow)
+From the original `README`:
 
-JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
+>JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
 
-![A demo of what it does](https://raw.githubusercontent.com/kartiknair/dhow/master/website/dhow.png)
-
--   [Getting Started](#getting-started)
--   [What it does](#what-it-does)
--   [CSS Files](#css-files)
--   [The `Head` component](#the-head-component)
--   [Custom Document](#custom-document)
--   [How it works](#how-it-works)
--   [Contributing](#contributing)
+The changes in this fork are made in the hope that the modifications will eventually be included in the upstream repository.
 
 ## Getting Started
 
-Getting started is very simple. You can use the [`create-dhow-app`](https://github.com/kartiknair/create-dhow-app) npm package to quickly bootstrap a project based on a template.
+The interface to the `dhow` command is
 
-```shell
-npx create-dhow-app my-app # Optionally specify a template like this: `--template blog`
+```
+$ npx @fsoc/dhow --help
+  Usage
+    $ dhow <command> [options]
 
-# For older versions of npm
-npm i -g create-dhow-app
-create-dhow-app my-app
+  Available Commands
+    build    Compiles your pages for deployment
+    dev      Rebuilds your pages on change and hosts them locally
+
+  For more info, run any command with the `--help` flag
+    $ dhow build --help
+    $ dhow dev --help
+
+  Options
+    -i, --indir      Sets the directory where files will be read from  (default pages)
+    -v, --version    Displays current version
+    -h, --help       Displays this message
 ```
 
-The default template will show you the basic structure of a Dhow app but using something like the blog template will show you everything Dhow can offer.
+By default, dhow expects a directory structure like
 
-### Create a project from scratch
-
-If you would like you can also create a project from scratch without using `create-dhow-app`. Let's walk through it.
-
-```shell
-# make a directory for your project
-mkdir my-app
-
-# change your directory
-cd my-app
-
-# initialize npm (optionally using `-y`)
-npm init -y
-
-# install dhow
-npm i dhow
-
-# create a `./pages` directory
-mkdir pages
+```
+├── pages
+│   ├── about.js
+│   └── index.js
+└── public
+    └── dhow.jpg
 ```
 
-Once you're at this point add a few `.js` files to the `./pages` directory. After that we can set up our scripts in `package.json`. We're gonna add two scripts `dev` to start the Dhow dev server & `build` to build the files a single time.
+and, given the above, generates a directory like
 
-```diff
-{
-    "name": "my-app",
-    "version": "1.0.0",
-    "description": "Basic example using Dhow as a Static Site Generator",
-    "main": "index.js",
-+    "scripts": {
-+        "dev": "dhow dev",
-+        "build": "dhow build"
-+    },
-    "author": "",
-    "license": "MIT",
-    "dependencies": {
-        "dhow": "^1.2.1"
-    }
-}
+```
+out
+├── about
+│   └── index.html
+├── dhow.jpg
+└── index.html
 ```
 
-## What it does
+which can be statically hosted using any webserver. The content of the public directory is simply copied over, the JavaScript files in the pages directory are transpiled to HTML and then copied to an appropiate location based on the file path.
 
-Dhow is basically a transpiler. It takes a `.js` file like this:
+Pages (the JavaScript files in the pages directory) are expected to export a function which returns JSX.
 
-```jsx
-import Dhow, { Head } from 'dhow'
+```js
+const Home = () => (<>
+    <img src={'/dhow.jpg'} alt={'Dhow'} />
 
-export default () => (
-    <main>
-        <Head>
-            <title>Home page</title>
-        </Head>
-        <h3>This is my home</h3>
-        <p>On the internet obviously</p>
-    </main>
-)
+    <p>
+        JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
+    </p>
+</>)
+
+export default Home
 ```
 
-and converts it into a static HTML file like this:
+## Build time data fetching
 
-```html
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Home page</title>
-    </head>
-    <body>
-        <div class="dhow">
-            <main>
-                <h3>This is my home</h3>
-                <p>On the internet obviously</p>
-            </main>
-        </div>
-    </body>
-</html>
+In addition to the required default export, pages can export the (optionally async) function `getProps`, which can be used to dynamicaly fetch content at build time. Its return value is passed to the default-exported function.
+
+```js
+export default ({ buildTime }) => (<>
+    <p>
+        This page was built on <time datetime={buildTime.toISOString()}>
+            {buildTime.toDateString()}
+        </time>.
+    </p>
+</>)
+
+export const getProps = async () => ({
+    buildTime: new Date()
+})
 ```
 
-You can also export an (optionally) async `getProps` function from your file to fetch data. This will be run during build time & the props that it returns will be passed to your `Head` component & default component.
+## Dynamic pages
 
-```jsx
-import Dhow, { Head } from 'dhow'
-import fetch from 'node-fetch'
+By default each page is mapped to a route, determined by its file path. One can map a single page to multiple routes by wrapping its file name in brackets, like `pages/post/[pid].js`.
 
-export default ({ posts }) => (
-    <main>
-        <Head>
-            <title>Blog Posts</title>
-        </Head>
-        <h1>All the blog posts</h1>
-        <ul>
-            {posts.map((post) => (
-                <li>
-                    <h3>{post.title}</h3>
-                </li>
-            ))}
-        </ul>
-    </main>
-)
+In order to define the possible routes, a page can export the (optionally async) function `getPaths`, which is expected to return an array of strings. The file name is ignored and can be thought to be replaced with each item in the array.
 
-export const getProps = async () => {
-    const res = await fetch('https://jsonplaceholder.typicode.com/posts')
-    const data = await res.json()
-    return { posts: data }
-}
-```
+```js
+export default ({ content }) => (<>
+    <p>
+        {content}
+    </p>
+</>)
 
-To generate multiple files using a single `.js` file you can export an (optionally) async `getPaths` function from your file. It should return an array of strings. Each of them will replace your filename in the end result. Each of the paths will also be passed to your `getProps` function if you do export one.
-
-```jsx
-import Dhow, { Head } from 'dhow'
-import { readFile, readdir } from 'fs/promises'
-import { join } from 'path'
-import matter from 'gray-matter'
-import marked from 'marked'
-
-export default ({
-    post: {
-        content,
-        data: { title, date, description },
-    },
-}) => (
-    <article>
-        <Head>
-            <title>{title}</title>
-            <meta name="description" content={description} />
-        </Head>
-
-        <h2>{title}</h2>
-        <p>
-            <small>{new Date(date).toDateString()}</small>
-        </p>
-        <p>{description}</p>
-        <h4>―</h4>
-        <div html={content}></div>
-    </article>
-)
-
-export const getPaths = async () => {
-    const files = await readdir('./content')
-    return files.map((path) => path.slice(0, path.length - 3))
+const data = {
+    'about': /* ... */,
+    'contact': /* ... */,
+    'privacy': /* ... */,
 }
 
-export const getProps = async (slug) => {
-    let post = await readFile(join('./content', `${slug}.md`), 'utf-8')
-    post = matter(post)
-    post.content = marked(post.content)
-    return { post }
-}
+export const getProps = async (slug) => ({
+    content: data[slug]
+})
+
+export const getPaths = async () => Object.keys(data)
 ```
 
-## CSS Files
+As can be seen in the example above, each item in the returned array is also passed to `getProps` (if it was exported). Assuming the above code is in the pages root, this would result in the routes `/about`, `/contact` and `/privacy` being available.
 
-Dhow uses [PostCSS](https://github.com/postcss/postcss) under the hood to process all your CSS files. This means you can create a `postcss.config.js` file in the root of your directory, and Dhow will use the plugins you use in that file (you can see this in the [TailwindCSS example](https://github.com/kartiknair/dhow/tree/master/examples/tailwind)).
+## Custom `App` and `Document`
 
-> Note: Dhow unlike some bundlers (like Parcel) uses **no plugins by default**
+Analogous to NextJS, one can override the default `App` or `Document` through providing an `_app.js` or `_document.js` in the pages directory.
 
-## The `Head` component
+The `App` is a wrapper around every page, it receives the component that is exported from every page and the result of the `getProps` function (`undefined` if it was not exported).
 
-To manage the contents of the document head you can use the `Head` component that Dhow exports. Import it like this:
+```js
+const App = ({ Component, pageProps = {} }) => (<>
+    <Component {...pageProps} />
 
-```jsx
-import Dhow, { Head } from 'dhow'
+    <Footer />
+</>)
+
+export default App
 ```
 
-And then whatever you put inside it will be inserted into the paage head at build time:
+The `Document` is the actual DOM tree into which the built HTML of every page will be inserted, it should, at minimum, include
 
-```jsx
-import Dhow, { Head } from 'dhow'
-
-export default () => (
-    <main>
-        <Head>
-            <title>Hello there</title>
-        </Head>
-        <h1>Hello world</h1>
-    </main>
-)
-
-/* Will become this: */
-<html>
-    <head>
-        <title>Hello there</title>
-    </head>
-    <body>
-        <div class="dhow">
-            <h1>Hello world</h1>
-        </div>
-    </body>
-<html>
-```
-
-The `Head` component prioritizes children components. Do if you have a `Head` component on the parent & on the child. The childs `Head` contents will **completely override** the page head. Example:
-
-```jsx
-import Dhow, { Head } from 'dhow'
-
-const Child = () => (
-    <div>
-        <Head>
-            <title>Hello there from the child</title>
-        </Head>
-        <p>I'm a nested component</p>
-    </div>
-)
-
-export default () => (
-    <main>
-        <Head>
-            <title>Hello there</title>
-        </Head>
-        <h1>Hello world</h1>
-        <Child />
-    </main>
-)
-
-/* Will become this: */
-<html>
-    <head>
-        <title>Hello there from the child</title>
-    </head>
-    <body>
-        <div class="dhow">
-            <h1>Hello world</h1>
-            <p>I'm a nested component</p>
-        </div>
-    </body>
-<html>
-```
-
-This is similar to the behaviour in other libraries like [Helmet](https://github.com/nfl/react-helmet)
-
-## Custom Document
-
-Similarly to Next.js, Dhow optionally allows you to specify a custom document for shared document-level markup. Just like Next.js you do this by creating a `_document.js` file in your pages directory. This file can export any sort of JSX, with the only requirement being that you must have one element with a `class` of `dhow` nested somewhere within. That element is where Dhow will insert all your page markup during build time.
-
-Here's an example of a custom document used to add some global CSS & scripts to all pages:
-
-```jsx
-/* ./pages/_document.js */
-import Dhow from 'dhow'
-
-const Document = () => (
-    <html lang="en">
+```js
+const Document = () => (<>
+    <html>
         <head>
-            <link rel="stylesheet" href="/global.css" />
         </head>
+
         <body>
-            <div class="dhow">
-                {/* this is where your page content will end up */}
-            </div>
-            <script src="/global.js"></script>
+            {/* Pages will get inserted here. */}
         </body>
     </html>
-)
+</>)
 
 export default Document
 ```
 
-## How it works
+Note that, if provided, this is a complete replacement of the internal default tree (which looks like the above), so make sure it is complete.
 
-Behind the scenes Dhow is actually pretty simple, it uses [`min-document`](https://github.com/Raynos/min-document) & [`esbuild`](https://github.com/evanw/esbuild) to create fake DOM nodes from your JSX.
+## Modifying the `head` content
 
-As a CLI tool Dhow takes `.js` files from your `./pages` directory & uses esbuild to compile it into non-JSX. Then it calls your default export function and appends the element it returns to a `.dhow` div in the document. If you do export a `Head` function then the contents of that are added to the `<head>` of the document. Then the `outerHTML` of this document is saved into an `html` file corresponding to the path of your source file.
+A `Head` component is exported which can be used to modify the contents of the document head on a per-page basis.
 
-If you export a `getProps` function then the results of that function are passed to your default & `Head` component. If you export a `getPaths` function then the same file is evalauated once for each path. Each path is also passed to `getProps` (if it exists) so you can fetch path-specific data. While it is not necessary you can use square brackets around the name of a file that exports a `getPaths` function to remain true to Next.js (e.g `[fileName].js`)
+```js
+import { Head } from '@fsoc/dhow'
 
-## Contributing
+export default () => (<>
+    <Head>
+        <title>Page title</title>
+    </Head>
+</>)
+```
 
-Feel free to add any features you might find useful. Just open an issue and we can go there. If you find a bug you can also open an issue but please make sure to include details like your system, node version, etc.
+It's fine to have multiple `Head`s in one document, but note that (unlike NextJS, for example) the content of the `Head` will be _appended_ to what is already in it (i. e. what was provided in `Document` or `App`).
+
+## Debugging and miscellaneous
+
+A number of internal variables are exposed through `process.env` for the consumption of pages.
+
+- `__DHOW_STAGING_PATH` the absolute path to the internal staging folder
+- `__DHOW_PAGE_PATH` the absolute path to the internal page file corresponding to the current file
+- `__DHOW_PAGE_DIR` the absolute path to the directory in which the current page file is in, for convenience
+- `__DHOW_ROUTE_PATH` the name of the current route, this is the path to which the `index.html` file which is generated for the current page will be written to, relative to the output directory
+
+[Debug](https://github.com/visionmedia/debug) is used to provide debug logs, enable it through setting the environment variable `DEBUG=dhow:*`.
+
+## CSS
+
+CSS is processed using PostCSS, `dhow` will attempt to read a `postcss.config.js` file from the root of the project and pass it to PostCSS. If none is found, nothing is passed through.

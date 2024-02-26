@@ -1,19 +1,25 @@
-import Dhow, { Head } from 'dhow'
+import { Head } from '@fsoc/dhow'
 
-export default () => (
-    <main>
-        <Head>
-            <title>Hello there. This is a working head!</title>
-        </Head>
-        <h1>Hello there!</h1>
-        <p>
-            This is a super simple example of generating static files using
-            Dhow. You can learn more{' '}
-            <a href="https://github.com/kartiknair/dhow">here</a>
-        </p>
-        <p>
-            Here's a <a href="/about">link to the about page</a> just for good
-            fun :D
-        </p>
-    </main>
-)
+const Home = () => (<>
+    <Head>
+        <title>Example Title</title>
+    </Head>
+
+    <img src={'/dhow.jpg'} alt={'Dhow'} />
+
+    <p>
+        JSX-powered SSG for Node.js. Write logic like React with a directory-structure like Next.js but generate plain HTML with no client side JS.
+    </p>
+
+    <p>
+        <a href={'/about'}>Read more...</a>
+    </p>
+
+    <p>
+        <small>
+            The image above is licensed under the <a href={'https://creativecommons.org/licenses/by-sa/3.0/deed.en'}>Creative Commons Attribution-Share Alike 3.0 Unported</a> license and was taken from <a href={'https://en.wikipedia.org/wiki/File:Dhow01.JPG'}>Wikipedia</a>.
+        </small>
+    </p>
+</>)
+
+export default Home
